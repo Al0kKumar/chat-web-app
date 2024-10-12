@@ -14,36 +14,24 @@ datasource db {
 }
 
 model User {
-  id             Int @id  @default(autoincrement())
-  name           String
-  phoneNumber    String @unique
-  password       String
-  chatof1        Chat[] @relation("chatparticipant1")
-  chatof2        Chat[]  @relation("chatparticipant2")
-  messages       Message[] @relation("UserMessages")
-
-}
-
-model Chat{
-  id                Int @id @default(autoincrement())
-  participant1      Int
-  participant2      Int
-  messages          Message[]
-
-  participant1User  User @relation("chatparticipant1",fields: [participant1],references: [id])
-  participant2User  User @relation("chatparticipant2",fields: [participant2],references: [id])
+  id                  Int @id  @default(autoincrement())
+  name                String
+  phoneNumber         String @unique
+  password            String
+  messagesent         Message[] @relation("sentMessages")
+  messagereceived     Message[] @relation("receiverMessages")
 
 }
 
 model Message{
-  id           Int @id @default(autoincrement())
-  chatId       Int
-  senderId     Int
-  content      String
-  timestamp    DateTime @default(now())
-  isRead       Boolean @default(false)
+  id                 Int @id @default(autoincrement())
+  senderId           Int
+  receiverId         Int
+  content            String
+  timestamp          DateTime @default(now())
+  isRead             Boolean @default(false)
 
-  chat         Chat @relation(fields: [chatId],references: [id])
-  sender       User @relation("UserMessages",fields: [senderId],references: [id])
+  sender             User @relation("sentMessages",fields: [senderId],references: [id])
+  receiver           User @relation("receiverMessages",fields: [receiverId],references: [id])
 
 }

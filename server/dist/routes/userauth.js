@@ -18,7 +18,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const router = (0, express_1.Router)();
 const client_1 = require("@prisma/client");
-const secret = 'secret';
+const authmiddleware_1 = __importDefault(require("./authmiddleware"));
 const prisma = new client_1.PrismaClient();
 const userSchema = zod_1.z.object({
     name: zod_1.z.string(),
@@ -80,7 +80,32 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     if (!isPasswordValid) {
         return res.status(401).json({ msg: "wrong password" });
     }
-    const token = jsonwebtoken_1.default.sign(checkuser, secret, { expiresIn: '1h' });
-    return res.status(200).json(token);
+    const token = jsonwebtoken_1.default.sign(checkuser, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return res.status(200).json({ token });
+}));
+const searchuserSchema = zod_1.z.object({
+    phoneNumber: zod_1.z.string()
+});
+router.get('/search', authmiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { phoneNumber } = req.query;
+    const check = searchuserSchema.safeParse({ phoneNumber });
+    if (!check.success) {
+        return res.status(401).json({ msg: "Invalid input" });
+    }
+    try {
+        const users = yield prisma.user.findMany({
+            where: {
+                phoneNumber: phoneNumber
+            }
+        });
+        if (users.length === 0) {
+            return res.status(404).json({ msg: "No users found with that phone number" });
+        }
+        return res.status(201).json(users);
+    }
+    catch (error) {
+        console.log("error fetching users ", error);
+        return res.status(500).json({ msg: "Internal server error" });
+    }
 }));
 exports.default = router;

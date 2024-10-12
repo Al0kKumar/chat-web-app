@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 const router = Router();
 import { PrismaClient } from "@prisma/client";
+import auth from "./authmiddleware";
 
 
 const prisma = new PrismaClient();
@@ -97,5 +98,40 @@ router.post('/login',async(req,res) => {
 
 })
 
+
+const searchuserSchema = z.object({
+    phoneNumber :z.string()
+}) 
+
+router.get('/search', auth ,async (req,res) => {
+
+    const {phoneNumber} = req.query
+     
+    const check = searchuserSchema.safeParse({phoneNumber});
+
+    if(!check.success){
+        return res.status(401).json({msg:"Invalid input"})
+    }
+
+    try {
+        const users = await prisma.user.findMany({
+            where:{
+                phoneNumber:phoneNumber as string
+            }
+        });
+    
+        if(users.length === 0){
+            return res.status(404).json({msg:"No users found with that phone number"})
+        }
+    
+        return res.status(201).json(users)
+
+    } catch (error) {
+        console.log("error fetching users ",error);
+        return res.status(500).json({msg:"Internal server error"})
+        
+    }
+
+})
            
 export default router ;

@@ -5,7 +5,6 @@ import userauthroutes from './routes/userauth'
 import chatroutes from './routes/chat'
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import { timeStamp } from 'console';
 
 const prisma = new PrismaClient()
 
@@ -23,9 +22,7 @@ app.use('/api/v1',userauthroutes);
 app.use('/api/v1',chatroutes);
 
 const server = createServer(app);
-
 const wss = new WebSocketServer({server});
-
 let clients = new Map<string,AuthenticatedWebSocket>();
 
 
@@ -50,14 +47,15 @@ wss.on('connection',async (ws: AuthenticatedWebSocket,req) => {
 
         const unreadMsgs = await prisma.message.findMany({
             where:{
-                recipientId : userId,
+                receiverId : parseInt(userId),
                 isRead: false
             },
             include:{
                 sender:true
             }
         })
-
+       
+        if(unreadMsgs){
         unreadMsgs.forEach(msg => {
             ws.send(JSON.stringify({
                 senderId: msg.senderId,
@@ -65,10 +63,11 @@ wss.on('connection',async (ws: AuthenticatedWebSocket,req) => {
                 timeStamp: msg.timestamp
             }))
         })
+    }
 
         await prisma.message.updateMany({
             where:{
-                recipientId: userId,
+                receiverId: parseInt(userId),
                 isRead:false
             },
             data:{
@@ -84,26 +83,35 @@ wss.on('connection',async (ws: AuthenticatedWebSocket,req) => {
 
      ws.on('message',async (message: string) => {
         const parsedmessage = JSON.parse(message);
-        const recipentId = parsedmessage.recipentId;
+        const recipientId = parseInt(parsedmessage.recipientId);
         const messageText = parsedmessage.message;
 
-        const recipentWs = clients.get(recipentId)
+        const recipientWs = clients.get(recipientId.toString())
 
-        if(recipentWs){
+        if(recipientWs){
 
-            recipentWs.send(JSON.stringify({
+            await prisma.message.create({
+                data:{
+                    content:messageText,
+                    senderId: parseInt(ws.userId as string) ,
+                    receiverId:recipientId,
+                    isRead:true
+                }
+            })
+
+            recipientWs.send(JSON.stringify({
                 senderId: ws.userId,
                 content: messageText,
-                timeStamp: new Date()
             }))
         }
         else{
             
             await prisma.message.create({
                 data:{
-                    chatId:1,
-                    senderId:ws.userId,
-                    content: messageText
+                    senderId: parseInt(ws.userId as string),
+                    receiverId:  recipientId,
+                    content: messageText,
+                    isRead: false
                 }
             })
             
