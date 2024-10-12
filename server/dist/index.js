@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const userauth_1 = __importDefault(require("./routes/userauth"));
 const chat_1 = __importDefault(require("./routes/chat"));
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
 app.use('/api/v1', userauth_1.default);
 app.use('/api/v1', chat_1.default);
 app.listen(3000, () => {

@@ -3,17 +3,17 @@ import { z } from 'zod';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 const router = Router();
+import { PrismaClient } from "@prisma/client";
 
-const secret = 'secret';
 
-
+const prisma = new PrismaClient();
 
 
 const userSchema = z.object({
     name : z.string(),
     phoneNumber : z.string(),
     password:z.string()
-})
+})  
 
 router.post('/signup', async(req: Request, res: Response)=>{
     
@@ -27,8 +27,8 @@ router.post('/signup', async(req: Request, res: Response)=>{
 
     const { name , phoneNumber ,password } = check.data;
 
-    const userexists = await prisma.User.findOne({
-        where:[phoneNumber:phoneNumber]
+    const userexists = await prisma.user.findUnique({
+        where:{phoneNumber:phoneNumber}
     })
 
     if(userexists){
@@ -37,13 +37,13 @@ router.post('/signup', async(req: Request, res: Response)=>{
         })
     }
 
-    const hashedpasssword = bcrypt.hash(password,10);
+    const hashedpassword = await bcrypt.hash(password,10);
 
-    const user = await prisma.User.create({
+    const user = await prisma.user.create({
         data:{
-            name,
-            phoneNumber,
-            password: hashedpasssword
+          name ,
+          phoneNumber,
+          password: hashedpassword 
         }
     })
 
@@ -75,7 +75,7 @@ router.post('/login',async(req,res) => {
 
     const { phoneNumber,password } = check.data;
 
-    const checkuser = await prisma.User.findUnique({
+    const checkuser = await prisma.user.findUnique({
         where:{phoneNumber:phoneNumber}
     })
 
@@ -90,12 +90,12 @@ router.post('/login',async(req,res) => {
         return res.status(401).json({msg:"wrong password"})
     }
 
-    const token = jwt.sign(checkuser,secret,{expiresIn: '1h'})
+    const token = jwt.sign(checkuser,process.env.JWT_SECRET as string,{expiresIn: '1h'})
 
 
-    return res.status(200).json(token)
+    return res.status(200).json({token})
 
 })
 
-
+           
 export default router ;
