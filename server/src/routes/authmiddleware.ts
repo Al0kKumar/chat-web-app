@@ -1,6 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken';
-import { object } from 'zod';
 
 const auth = (req: Request,res: Response, next : NextFunction) => {
      
@@ -22,3 +21,5 @@ const auth = (req: Request,res: Response, next : NextFunction) => {
     });
 
 }
+
+export default auth;

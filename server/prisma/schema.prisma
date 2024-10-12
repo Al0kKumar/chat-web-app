@@ -41,6 +41,7 @@ model Message{
   senderId     Int
   content      String
   timestamp    DateTime @default(now())
+  isRead       Boolean @default(false)
 
   chat         Chat @relation(fields: [chatId],references: [id])
   sender       User @relation("UserMessages",fields: [senderId],references: [id])
