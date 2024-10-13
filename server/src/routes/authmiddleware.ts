@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken';
+const secret = 'alok'
 
 interface CustomRequest extends Request{
     user?:any;
@@ -14,7 +15,7 @@ const auth = (req: CustomRequest,res: Response, next : NextFunction) => {
     }
 
 
-    jwt.verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
         if (err) {
             console.error('Token verification failed:', err);
         } else {
