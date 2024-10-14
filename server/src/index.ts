@@ -31,6 +31,8 @@ let clients = new Map<string,AuthenticatedWebSocket>();
 
 console.log("WebSocket server is created");
 
+
+// a user is connected to the web socket server 
 wss.on('connection',async (ws: AuthenticatedWebSocket,req) => {
 
     console.log('New WebSocket connection attempt');
@@ -83,13 +85,19 @@ try {
 }
 
   
-
+// server receives the message form the client &&
+// and now its handles the message to send to the recipent back form the \
+// web socket connections 
 ws.on('message', async (message: string) => {
     const parsedMessage = JSON.parse(message);
     const recipientId = parsedMessage.recipientId;
     const messageText = parsedMessage.message;
 
     const recipientWs = clients.get(recipientId);
+
+    if(!messageText){
+        return ws.close(4002,'Empty message');
+    }
 
     const recipient = await prisma.user.findUnique({
         where: { id: parseInt(recipientId) },
@@ -119,6 +127,12 @@ ws.on('message', async (message: string) => {
                 senderId: ws.userId,
                 content: messageText
             }));
+            
+            // updating the message status in db if the user is online 
+            await prisma.message.updateMany({
+                where:{senderId:parseInt(ws.userId),receiverId:parseInt(recipientId),isRead:false},
+                data:{isRead:true}
+            })
         }
 
     } catch (error) {
@@ -131,10 +145,7 @@ ws.on('message', async (message: string) => {
     ws.on('close', (code,reason) => {
         console.log(`WebSocket closed. Code: ${code}, Reason: ${reason.toString()}`);
         clients.delete(ws.userId)
-        // if(ws.userId){
-        // console.log(`User disconnected `,code,reason);
-        // clients.delete(ws.userId);
-        // }
+        
     })
     ws.on('error', (error)=> {
         console.error('websocket error',error.message);        

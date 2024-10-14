@@ -80,7 +80,7 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     if (!isPasswordValid) {
         return res.status(401).json({ msg: "wrong password" });
     }
-    const token = jsonwebtoken_1.default.sign(checkuser, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jsonwebtoken_1.default.sign(checkuser, process.env.JWT_SECRET_KEY);
     return res.status(200).json({ token });
 }));
 const searchuserSchema = zod_1.z.object({
