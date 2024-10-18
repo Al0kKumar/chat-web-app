@@ -3,14 +3,14 @@ import { PrismaClient } from "@prisma/client";
 import {z} from 'zod';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { getotp, sendotp } from "../services/sms";
+import { getotp, sendotp } from "../services/email";
 
 const prisma  = new PrismaClient()
 
 
 const userSchema = z.object({
     name : z.string(),
-    phoneNumber : z.string(),
+    email : z.string(),
     password:z.string()
 })  
 
@@ -25,36 +25,34 @@ const Signup = async  (req: Request, res: Response) => {
         })
     }
 
-    const { name , phoneNumber ,password } = check.data;
+    const { name , email ,password } = check.data;
 
     const userexists = await prisma.user.findUnique({
-        where:{phoneNumber:phoneNumber}
+        where:{email: email}
     })
 
     if(userexists){
         return res.status(400).json({
-            msg:"user already exists with this number "
+            msg:"user already exists with this email "
         })
     }
 
     const hashedpassword = await bcrypt.hash(password,10);
 
     const otp = getotp();
-    const OTP = otp.toString();
-
     const creationtime = new Date();
 
     const user = await prisma.user.create({
         data:{
           name ,
-          phoneNumber,
+          email,
           password: hashedpassword,
-          otp:OTP,
+          otp:otp,
           otpCreatedat:creationtime
         }
     })
 
-    sendotp(phoneNumber,OTP);
+    sendotp(email,otp);
 
     if(!user){
         return res.status(404).json({
@@ -71,7 +69,7 @@ const Signup = async  (req: Request, res: Response) => {
 
 
 const verifyOTPSchema = z.object({
-    PhoneNumber: z.string(),
+    email: z.string(),
     OTP:z.string()
 })
 
@@ -83,10 +81,10 @@ const verifyOTP = async (req: Request, res: Response) => {
         return res.status(401).json({msg:"Incorrect input "})
     }
      
-    const { PhoneNumber, OTP } = req.body;
+    const { email, OTP } = req.body;
 
     const user = await prisma.user.findUnique({
-        where:{phoneNumber:PhoneNumber}
+        where:{email:email}
     })
 
     if(!user){
@@ -106,7 +104,7 @@ const verifyOTP = async (req: Request, res: Response) => {
     }
 
     await prisma.user.update({
-        where: { phoneNumber: PhoneNumber },
+        where: { email: email },
         data: { otp: null ,otpCreatedat:null}, 
     });
 
@@ -115,7 +113,7 @@ const verifyOTP = async (req: Request, res: Response) => {
 }
 
 const loginSchema = z.object({
-    phoneNumber:z.string(),
+    email:z.string(),
     password:z.string()
 })
 
@@ -131,10 +129,10 @@ const Login = async (req: Request, res: Response) => {
         })
     }
 
-    const { phoneNumber,password } = check.data;
+    const { email,password } = check.data;
 
     const checkuser = await prisma.user.findUnique({
-        where:{phoneNumber:phoneNumber}
+        where:{email:email}
     })
 
     if(!checkuser){
@@ -155,4 +153,4 @@ const Login = async (req: Request, res: Response) => {
 }
 
 
-export  { Signup, Login }
+export  { Signup, Login, verifyOTP }

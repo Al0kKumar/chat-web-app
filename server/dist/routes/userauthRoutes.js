@@ -7,5 +7,6 @@ const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 const userauth_1 = require("../controllers/userauth");
 router.post('/signup', userauth_1.Signup);
+router.post('verify-otp', userauth_1.verifyOTP);
 router.post('/login', userauth_1.Login);
 exports.default = router;
