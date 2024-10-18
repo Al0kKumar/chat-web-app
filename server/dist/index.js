@@ -16,8 +16,8 @@ const express_1 = __importDefault(require("express"));
 const ws_1 = require("ws");
 const http_1 = require("http");
 const cors_1 = __importDefault(require("cors"));
-const userauth_1 = __importDefault(require("./routes/userauth"));
-const chat_1 = __importDefault(require("./routes/chat"));
+const userauthRoutes_1 = __importDefault(require("./routes/userauthRoutes"));
+const chatRoute_1 = __importDefault(require("./routes/chatRoute"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
@@ -25,12 +25,13 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 require('dotenv').config();
 app.use(express_1.default.json());
-app.use('/api/v1', userauth_1.default);
-app.use('/api/v1', chat_1.default);
+app.use('/api/v1', userauthRoutes_1.default);
+app.use('/api/v1', chatRoute_1.default);
 const server = (0, http_1.createServer)(app);
 const wss = new ws_1.WebSocketServer({ server });
 let clients = new Map();
 console.log("WebSocket server is created");
+// a user is connected to the web socket server 
 wss.on('connection', (ws, req) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     console.log('New WebSocket connection attempt');
@@ -76,11 +77,17 @@ wss.on('connection', (ws, req) => __awaiter(void 0, void 0, void 0, function* ()
         ws.close(4002, 'Invalid token');
         return;
     }
+    // server receives the message form the client &&
+    // and now its handles the message to send to the recipent back form the \
+    // web socket connections 
     ws.on('message', (message) => __awaiter(void 0, void 0, void 0, function* () {
         const parsedMessage = JSON.parse(message);
         const recipientId = parsedMessage.recipientId;
         const messageText = parsedMessage.message;
         const recipientWs = clients.get(recipientId);
+        if (!messageText) {
+            return ws.close(4002, 'Empty message');
+        }
         const recipient = yield prisma.user.findUnique({
             where: { id: parseInt(recipientId) },
         });
@@ -105,6 +112,11 @@ wss.on('connection', (ws, req) => __awaiter(void 0, void 0, void 0, function* ()
                     senderId: ws.userId,
                     content: messageText
                 }));
+                // updating the message status in db if the user is online 
+                yield prisma.message.updateMany({
+                    where: { senderId: parseInt(ws.userId), receiverId: parseInt(recipientId), isRead: false },
+                    data: { isRead: true }
+                });
             }
         }
         catch (error) {

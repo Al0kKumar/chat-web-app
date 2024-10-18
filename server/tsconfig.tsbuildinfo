@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/routes/authmiddleware.ts","./src/routes/chat.ts","./src/routes/userauth.ts"],"version":"5.6.2"}
+{"root":["./src/index.ts","./src/controllers/chat.ts","./src/controllers/userauth.ts","./src/middlewares/authmiddleware.ts","./src/routes/chatroute.ts","./src/routes/userauthroutes.ts","./src/services/sms.ts"],"version":"5.6.2"}

@@ -18,6 +18,8 @@ model User {
   name                String
   phoneNumber         String @unique
   password            String
+  otp                 String?
+  otpCreatedat        DateTime?
   messagesent         Message[] @relation("sentMessages")
   messagereceived     Message[] @relation("receiverMessages")
 

@@ -2,8 +2,8 @@ import express from 'express';
 import { WebSocketServer, WebSocket } from 'ws'
 import http, { createServer } from 'http'
 import cors from 'cors';
-import userauthroutes from './routes/userauth'
-import chatroutes from './routes/chat'
+import userauthroutes from './routes/userauthRoutes'
+import chatroutes from './routes/chatRoute'
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 
