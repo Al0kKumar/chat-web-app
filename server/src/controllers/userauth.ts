@@ -4,6 +4,7 @@ import {z} from 'zod';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { getotp, sendotp } from "../services/email";
+import { PhoneNumberContextImpl } from "twilio/lib/rest/lookups/v2/phoneNumber";
 
 const prisma  = new PrismaClient()
 
@@ -11,6 +12,7 @@ const prisma  = new PrismaClient()
 const userSchema = z.object({
     name : z.string(),
     email : z.string(),
+    phoneNumber: z.string(),
     password:z.string()
 })  
 
@@ -25,7 +27,7 @@ const Signup = async  (req: Request, res: Response) => {
         })
     }
 
-    const { name , email ,password } = check.data;
+    const { name , email ,password , phoneNumber} = check.data;
 
     const userexists = await prisma.user.findUnique({
         where:{email: email}
@@ -46,6 +48,7 @@ const Signup = async  (req: Request, res: Response) => {
         data:{
           name ,
           email,
+          phoneNumber,
           password: hashedpassword,
           otp:otp,
           otpCreatedat:creationtime
@@ -117,8 +120,6 @@ const loginSchema = z.object({
     password:z.string()
 })
 
-
-
 const Login = async (req: Request, res: Response) => {
     
     const check = loginSchema.safeParse(req.body);
@@ -152,5 +153,28 @@ const Login = async (req: Request, res: Response) => {
     return res.status(200).json({token})
 }
 
+const searchSchema = z.object({
+    phoneNumber:z.string()
+})
 
-export  { Signup, Login, verifyOTP }
+const search = async  (req: Request, res: Response) => {
+    
+    const check = searchSchema.safeParse(req.body);
+
+    if(!check.success){
+        return res.status(401).json({msg:"Invalid input"})
+    }
+    
+    const { phoneNumber } = req.body;
+
+    const users = await prisma.user.findMany({
+        where:{phoneNumber: phoneNumber}
+    }) 
+
+    return  res.status(201).json({users})
+
+
+}
+
+
+export  { Signup, Login, verifyOTP ,search}

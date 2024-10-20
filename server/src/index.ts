@@ -4,6 +4,7 @@ import http, { createServer } from 'http'
 import cors from 'cors';
 import userauthroutes from './routes/userauthRoutes'
 import chatroutes from './routes/chatRoute'
+import searchroutes from './routes/searchRoute'
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 
@@ -23,6 +24,7 @@ interface AuthenticatedWebSocket extends WebSocket {
 
 app.use('/api/v1',userauthroutes);
 app.use('/api/v1',chatroutes);
+app.use('api/v1', searchroutes)
 
 const server = createServer(app);
 const wss = new WebSocketServer({server});
