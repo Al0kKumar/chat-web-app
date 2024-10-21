@@ -4,7 +4,6 @@ import {z} from 'zod';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { getotp, sendotp } from "../services/email";
-import { PhoneNumberContextImpl } from "twilio/lib/rest/lookups/v2/phoneNumber";
 
 const prisma  = new PrismaClient()
 

@@ -24,7 +24,7 @@ interface AuthenticatedWebSocket extends WebSocket {
 
 app.use('/api/v1',userauthroutes);
 app.use('/api/v1',chatroutes);
-app.use('api/v1', searchroutes)
+app.use('/api/v1', searchroutes)
 
 const server = createServer(app);
 const wss = new WebSocketServer({server});
@@ -70,13 +70,13 @@ try {
             ws.send(JSON.stringify({
                 senderId: message.senderId,
                 content: message.content,
-                sendAt:message.timestamp
+                sendAt: message.timestamp
             }))
         }
       }
 
       await prisma.message.updateMany({
-        where:{receiverId:parseInt(userId),isRead:false},
+        where:{receiverId: parseInt(userId),isRead: false},
         data:{isRead: true}
       })
       
@@ -88,7 +88,7 @@ try {
 
   
 // server receives the message form the client &&
-// and now its handles the message to send to the recipent back form the \
+// and now it handles the message to send to the recipent back from the 
 // web socket connections 
 ws.on('message', async (message: string) => {
     const parsedMessage = JSON.parse(message);
