@@ -19,22 +19,8 @@ model User {
   email               String @unique
   phoneNumber         String @unique
   password            String
+  isOnlline           Boolean @default(false)
   otp                 String?
   otpCreatedat        DateTime?
-  messagesent         Message[] @relation("sentMessages")
-  messagereceived     Message[] @relation("receiverMessages")
-
 }
 
-model Message{
-  id                 Int @id @default(autoincrement())
-  senderId           Int
-  receiverId         Int
-  content            String
-  timestamp          DateTime @default(now())
-  isRead             Boolean @default(false)
-
-  sender             User @relation("sentMessages",fields: [senderId],references: [id])
-  receiver           User @relation("receiverMessages",fields: [receiverId],references: [id])
-
-}
