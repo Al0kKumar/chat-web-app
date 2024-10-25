@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.message {
+    margin: 10px 0;
+  }
+  .sent {
+    text-align: right; /* Align sent messages to the right */
+  }
+  .received {
+    text-align: left; /* Align received messages to the left */
+  }

@@ -5,6 +5,8 @@ import TextField from '@mui/material/TextField';
 interface propstype{
  label: string
  type: string
+ value: string
+ onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 export default function FullWidthTextField(props: propstype) {

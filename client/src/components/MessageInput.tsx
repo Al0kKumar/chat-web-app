@@ -2,10 +2,11 @@
 import React, { useState } from 'react';
 
 interface MessageInputProps {
-  onSend: (message: string) => void; // Callback function to send messages
+  onSend: (message: string) => void; // Callback function to send message
+  onTyping: () => void;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ onSend }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ onSend, onTyping}) => {
   const [message, setMessage] = useState('');
 
   const handleSend = () => {

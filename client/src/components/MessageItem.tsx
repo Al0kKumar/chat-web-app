@@ -1,6 +1,8 @@
 // MessageItem.tsx
 import React from 'react';
 
+
+
 interface MessageItemProps {
   message: string;
   isSender: boolean; // True if the message is sent by the user, otherwise false

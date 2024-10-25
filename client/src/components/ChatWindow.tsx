@@ -1,59 +1,85 @@
-import React, { useEffect, useRef, useState } from 'react';
-import MessageItem from './MessageItem';
-import MessageInput from './MessageInput';
+// ChatPage.tsx
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 interface Message {
   content: string;
-  sender: string; // User who sent the message
+  senderId: number;
+  receiverId: number;
+  timestamp: Date; // Optional if you want to display message time
 }
 
-interface ChatWindowProps {
-  username: string; // Current user's username
-  receiver: string; // Receiver's username
-  socket: WebSocket; // WebSocket instance for real-time communication
+interface ChatPageProps {
+  contactUserId: number; 
+  receiverName: string; 
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ username, receiver, socket }) => {
+const ChatPage: React.FC<ChatPageProps> = ({ contactUserId, receiverName }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null); // Reference to scroll to the bottom of the chat
+  const [inputValue, setInputValue] = useState('');
 
-  const sendMessage = (message: string) => {
-    
-    const newMessage = { content: message, sender: username };
-    setMessages((prev) => [...prev, newMessage]); // Update local messages
-    socket.send(JSON.stringify(newMessage)); // Send message via WebSocket
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(`/api/v1/messages/${contactUserId}`);
+        setMessages(response.data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+
+    fetchMessages();
+  }, [contactUserId]);
+
+  const handleSendMessage = async () => {
+    if (inputValue.trim() === '') return;
+
+    try {
+      await axios.post('/api/v1/send-message', {
+        content: inputValue,
+        receiverId: contactUserId,
+      });
+
+      // Clear the input field and update messages
+      setInputValue('');
+      const response = await axios.get(`/api/v1/messages/${contactUserId}`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
-  // Effect to listen for incoming messages
-  useEffect(() => {
-    socket.onmessage = (event) => {
-      const message: Message = JSON.parse(event.data);
-      setMessages((prev) => [...prev, message]); // Update messages with the new message
-    };
-  }, [socket]);
-
-  // Scroll to the bottom whenever messages change
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
-
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-100">
-        {messages.map((msg, index) => (
-          <MessageItem
-            key={index}
-            message={msg.content}
-            isSender={msg.sender === username}
-          />
-        ))}
-        <div ref={messagesEndRef} /> {/* Scroll reference */}
+    <div className="chat-page flex flex-col h-screen">
+      {/* Top Bar */}
+      <div className="top-bar bg-blue-600 text-white p-4">
+        <h1>{receiverName}</h1>
       </div>
-      <MessageInput onSend={sendMessage} />
+
+      {/* Messages Container */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {messages.map((msg, index) => (
+          <div key={index} className={`message ${msg.senderId === contactUserId ? 'received' : 'sent'}`}>
+            <span>{msg.content}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Input Field */}
+      <div className="input-container p-4 bg-gray-100">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          className="w-full p-2 border rounded"
+          placeholder="Type a message..."
+        />
+        <button onClick={handleSendMessage} className="ml-2 bg-blue-600 text-white px-4 py-2 rounded">
+          Send
+        </button>
+      </div>
     </div>
   );
 };
 
-export default ChatWindow;
+export default ChatPage;

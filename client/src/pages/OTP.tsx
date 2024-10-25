@@ -1,14 +1,37 @@
 // OtpPage.tsx
 import React, { useState } from 'react';
 import OTPInput from '../components/OtpInput';
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
 
 const OtpPage: React.FC = () => {
   const [otp, setOtp] = useState('');
+  
+  const navigate = useNavigate();
+
+  const email = localStorage.getItem('token')
+
+  const tosend = {
+    email,
+    otp
+  }
 
   const handleSubmit = () => {
     if (otp.length === 6) {
       console.log('OTP submitted:', otp);
-      // You can call your API or verification function here
+      
+      const res = axios.post('http://localhost:3000/api/v1/verfiy-otp', tosend)
+
+      if(res.status === '200' || res.status === '201'){
+        console.log('user verified and created successfully ');
+        localStorage.clear();
+        navigate('/dashboard')
+      }
+      else{
+        console.log('incorrect otp');
+        navigate('/signup')
+      }
+
       alert(`OTP submitted: ${otp}`);
     } else {
       alert('Please enter a valid OTP of length 6');

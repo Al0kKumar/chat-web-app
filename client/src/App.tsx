@@ -4,7 +4,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import OtpPage from './pages/OTP';
 import Dashboard from './pages/Dashboard';
-import ChatPage from './pages/ChatPage';
+import Chats from './pages/Chats'
 
 function App() {
 
@@ -15,7 +15,7 @@ function App() {
         <Route path='/otp' element={<OtpPage/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/dashboard' element={<Dashboard/>}/>
-        <Route path='/chat' element={<ChatPage/>}/>
+        <Route path='/chat' element={<Chats/>}/>
       </Routes>
     </Router>
   )

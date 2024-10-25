@@ -1,34 +1,63 @@
-// Dashboard.tsx
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SearchBar from '../components/SearchBar';
-import ChatList from '../components/ChatList';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const Dashboard: React.FC = () => {
-  const [searchValue, setSearchValue] = useState('');
+interface Chat {
+  id: number;
+  name: string;
+  phoneNumber: string; // Assuming you have a phone number field
+}
 
-  // Sample chat data
-  const chats = [
-    { username: 'Alice', message: 'Hey there!', timestamp: '10:00 AM' },
-    { username: 'Bob', message: 'How are you?', timestamp: '9:30 AM' },
-    { username: 'Charlie', message: 'Let’s meet up!', timestamp: 'Yesterday' },
-    { username: 'David', message: 'What’s up?', timestamp: '2:00 PM' },
-    { username: 'Eve', message: 'Let’s grab lunch.', timestamp: '11:30 AM' },
-  ];
+const Dashboard = () => {
+  const navigate = useNavigate();
 
-  // Filter chats based on the search value
-  const filteredChats = chats.filter((chat) =>
-    chat.username.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const [search, setSearch] = useState('');
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [filteredChats, setFilteredChats] = useState<Chat[]>([]);
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/v1/getchats');
+        setChats(response.data);
+        setFilteredChats(response.data); // Initially, show all chats
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+      }
+    };
+
+    fetchChats();
+  }, []);
+
+  useEffect(() => {
+    const filtered = chats.filter(chat => 
+      chat.phoneNumber.toLowerCase().includes(search.toLowerCase())
+    );
+    setFilteredChats(filtered);
+  }, [search, chats]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+  };
+
+  const handleChatClick = (chatId: number) => {
+    navigate(`/chats/?${chatId}`);
+  };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <SearchBar value={searchValue} onChange={setSearchValue} />
-      <div className="flex-1 overflow-y-auto">
-        <ChatList chats={filteredChats} />
+    <div className="dashboard">
+      <SearchBar value={search} onChange={handleSearchChange} placeholder="Search by phone number" />
+
+      <div className="chat-list">
+        {filteredChats.map((chat) => (
+          <div key={chat.id} className="chat-item" onClick={() => handleChatClick(chat.id)}>
+            {chat.name}
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
 export default Dashboard;
-

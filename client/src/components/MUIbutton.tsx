@@ -4,6 +4,7 @@ import Button from '@mui/material/Button';
 
 interface types {
     label:string
+    onClick: any
 } 
 
 export default function ButtonSizes(props: types) {
@@ -16,6 +17,7 @@ export default function ButtonSizes(props: types) {
                 fontSize: '1.1rem',     
                 width: '420px',         
               }}
+              onClick={props.onClick}
             >
                 {props.label}
             </Button>
