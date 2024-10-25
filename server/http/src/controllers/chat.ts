@@ -1,45 +1,31 @@
 import { Request, Response } from 'express'
-import {z} from 'zod'
 import Messages from '../../../models/Message'
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
 
 
-const chathistorySchema = z.object({
-    senderid: z.string(),
-    receiverid: z.string(),
-})
-
-const chathistory = async (req: Request,res: Response) => {
+const Chatsbetween = async (req: Request,res: Response) => {
    
-    const check = chathistorySchema.safeParse(req.body);
-
-    if(!check.success){
-        return res.status(401).json({msg:"Invalid inouts"})
-    }
-
-    const senderid = req.user?.id;
-
-    const { receiverid } = req.body;
+    const currentuserid = req.user.id
+    const otheruserid = parseInt(req.params.chatId)
 
     try {
-        const chats = await Messages.find({
-            $or:[
-                {senderid: senderid, receiverid: receiverid},
-                {senderid: receiverid, receiverid: senderid}
-            ]
-        })
-        .sort({createdAt: 1})
-    
-        return res.status(200).json({chats})
-
-    } catch (error) {
-        console.error('Error during fetching chats history', error);
-        return res.status(500).json({msg:"failed to fetch chats history"})
+        const messages = await Messages.find({
+            $or: [
+              { senderId: currentuserid, receiverId: otheruserid },
+              { senderId: otheruserid, receiverId: currentuserid },
+            ],
+          })
+            .sort({ timestamp: 1 }) // Sort messages in chronological order
+            .lean();
         
+        res.json(messages);
+    } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    
 
 }
 
 
-export default chathistory;
+export default Chatsbetween

@@ -1,10 +1,13 @@
 import { Router } from "express";
-import chathistory from "../controllers/chat";
+import Chatsbetween from "../controllers/chat";
 import auth from "../middlewares/authmiddleware";
+import { getAllchats } from "../controllers/searchUser";
 
 const router = Router();
 
-router.post('/chathistory',auth,chathistory)
+router.get('/chathistory', auth, Chatsbetween )
+
+router.get('/getchats', auth, getAllchats)
 
 
 export default router ;
