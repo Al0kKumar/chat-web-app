@@ -12,7 +12,15 @@ interface propstype{
 export default function FullWidthTextField(props: propstype) {
   return (
     <Box sx={{ width: 500, maxWidth: '100%' }}>
-      <TextField fullWidth label={props.label} type={props.type} id="fullWidth" />
+      <TextField 
+      fullWidth
+      label={props.label} 
+      type={props.type}
+      value={props.value}
+      onChange={props.onChange}
+      />
     </Box>
   );
 }
+
+// id="fullWidth"
