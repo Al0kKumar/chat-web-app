@@ -50,7 +50,6 @@ const Signup = async  (req: Request, res: Response) => {
             phoneNumber,
             password: hashedpassword,
             otp: otp,
-            isOnline:false,
             otpCreatedat: creationtime
         }
     })
@@ -111,7 +110,10 @@ const verifyOTP = async (req: Request, res: Response) => {
         data: { otp: null ,otpCreatedat:null}, 
     });
 
-    return res.status(200).json({msg:"User Verfied and created  successfully"})
+    const token = jwt.sign({id: user.id},process.env.JWT_SECRET_KEY )
+
+
+    return res.status(200).json({token})
     
 }
 
@@ -153,5 +155,26 @@ const Login = async (req: Request, res: Response) => {
     return res.status(200).json({token})
 }
 
+const userDetails = async (req: Request,res: Response) => {
+   
+    try {
+        const userid = parseInt(req.user.id);
+    
+        const details = await prisma.user.findUnique({
+            where:{id: userid}
+        })
 
-export  { Signup, Login, verifyOTP }
+        if(!details){
+            return res.status(404).json({msg:"No user found"})
+        }
+    
+    
+        return res.status(200).json(details)
+    } catch (error) {
+        console.log('invalid token / unauthorised', error);
+        
+    }
+} 
+
+
+export  { Signup, Login, verifyOTP, userDetails }

@@ -16,5 +16,5 @@ app.use('/api/v1', userauthRoutes_1.default); // done
 app.use('/api/v1', chatRoute_1.default);
 app.use('/api/v1', searchRoute_1.default);
 app.listen(process.env.PORT1, () => {
-    console.log(`server is running on port ${process.env.PORT1}`);
+    console.log("server is running on port 8080");
 });

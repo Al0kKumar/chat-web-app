@@ -10,7 +10,9 @@ const transporter = nodemailer.createTransport({
     auth :{
         user: process.env.EMAIL,
         pass: process.env.PASSWORD
-    }
+    },
+    logger: true, 
+    debug: true 
 })
 
 

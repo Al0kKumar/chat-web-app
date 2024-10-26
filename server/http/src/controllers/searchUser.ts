@@ -1,7 +1,6 @@
 import {z} from 'zod'
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import Messages from '../../../models/Message';
 const prisma = new PrismaClient()
 
 
@@ -18,21 +17,30 @@ const search = async  (req: Request, res: Response) => {
             return res.status(404).json({msg:"User not found"})
         }
     
-        const lastMessage = await Messages.findOne({
-            $or: [{ senderId: users.id }, { receiverId: users.id }],
-          })
-            .sort({ timestamp: -1 })
-            .lean();
-    
-            const chat = {
-                id: users.id,
-                username: users.name,
-                phoneNumber: users.phoneNumber,
-                lastMessage: lastMessage
-                  ? { content: lastMessage.content}
-                  : { content: 'No messages', timestamp: null },
-              };
-    
+        const lastMessage = await prisma.messages.findFirst({
+            where: {
+              OR: [
+                { senderid: users.id },
+                { receiverid: users.id },
+              ],
+            },
+            orderBy: {
+              timestamp: 'desc',
+            },
+            select: {
+              content: true,
+              timestamp: true, // Include timestamp if you want to access it later
+            },
+          });
+          
+          const chat = {
+            id: users.id,
+            username: users.name,
+            phoneNumber: users.phoneNumber,
+            lastMessage: lastMessage
+              ? { content: lastMessage.content, timestamp: lastMessage.timestamp }
+              : { content: 'No messages', timestamp: null },
+          };
     
         res.json(chat)
     } catch (error) {
@@ -53,22 +61,31 @@ const getAllchats = async (req: Request, res: Response) => {
     });
 
     const chats = await Promise.all(users.map(async (user) => {
-        
-        const lastMessage = await Messages.findOne({
-            $or: [
-                { senderId: userid, receiverId: user.id },
-                { senderId: user.id, receiverId: userid }
-            ]
-        }).sort({ createdAt: -1 });
-
+        const lastMessage = await prisma.messages.findFirst({
+            where: {
+                OR: [
+                    { senderid: userid, receiverid: user.id },
+                    { senderid: user.id, receiverid: userid },
+                ],
+            },
+            orderBy: {
+                timestamp: 'desc', // Adjust to your timestamp field
+            },
+            select: {
+                content: true,
+                timestamp: true, // Include the timestamp field
+            },
+        });
+    
         return {
             userid: user.id,
             userName: user.name,
             phoneNumber: user.phoneNumber,
-            lastMessage: lastMessage ? lastMessage.content : null, // Add other message fields as needed
-            lastMessageTime: lastMessage ? lastMessage.createdAt : null // Adjust as per your message schema
+            lastMessage: lastMessage ? lastMessage.content : null, // Get last message content
+            lastMessageTime: lastMessage ? lastMessage.timestamp: null, // Get last message timestamp
         };
     }));
+    
 
     res.status(200).json(chats);
 
