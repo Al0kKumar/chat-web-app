@@ -1,19 +1,24 @@
 import { WebSocketServer} from "ws";
 import WebSocket from "ws";
 import jwt, { JwtPayload } from 'jsonwebtoken'
-import Messages from '../../models/Message'
+import { PrismaClient } from "@prisma/client";
 
-const wss = new WebSocketServer({port: 8080})
+require('dotenv').config();
+
+const prisma = new PrismaClient()
+
+const wss = new WebSocketServer({port: parseInt(process.env.PORT2)})
 
 const clients = new Map();
 
 wss.on('listening', ()=> {
-   console.log('websocket server is running on port 8080');
+   console.log(`websocket server is running on port ${process.env.PORT2}`);
 })
 
 wss.on('connection', async (ws,req) => {
-
-   const token = req.headers['sec-websocket-protocol'];
+   
+   const url = new URL(req.url, `http://${req.headers.host}`);
+   const token = url.searchParams.get('token'); 
 
    if(!token){
      return ws.close(400,'Token is not present')  
@@ -36,14 +41,14 @@ wss.on('connection', async (ws,req) => {
 
    // check if the client has any unread messages 
    try {
-      const unreadmsgs = await Messages.find({receiverid: senderid, isRead: false})
+      const unreadmsgs = await prisma.messages.findMany({where:{receiverid: senderid, isRead: false}})
       ws.send(JSON.stringify({unreadmsgs}))
    } catch (error) {
       console.error('Error fetching unread messsages: ', error);
       
    }
    
-   // received a message => parsed it into json , stored it into mongodb, if state of the reciver is open so sent to that user 
+   // received a message => parsed it into json , stored it into db, if state of the reciver is open so sent to that user 
    ws.on('message', async (message: WebSocket.Data) => {
 
       if(typeof message === 'string'){
@@ -53,11 +58,12 @@ wss.on('connection', async (ws,req) => {
       const { senderid,receiverid,content } = parsedmessage;
       
       try {
-         await Messages.create({
+         await prisma.messages.create({
+            data:{
             senderid,
             receiverid,
             content,
-            isRead: false
+            }
          })
       } catch (error) {
          console.error('Error storing message:', error);
@@ -73,10 +79,10 @@ wss.on('connection', async (ws,req) => {
          // send the message to the recipent 
          receiversocket.send(JSON.stringify(parsedmessage));
 
-         await Messages.updateMany(
-            {senderid: senderid, receiverid: receiverid, isRead: false},
-            {$set: {isRead: true}}
-         )
+         await prisma.messages.updateMany({
+            where:{senderid: senderid, receiverid: receiverid, isRead: false},
+            data:{isRead: true}
+         })
       }
      }
    })
@@ -93,4 +99,4 @@ wss.on('connection', async (ws,req) => {
 
 })
 
-console.log('websocket server started on port 8080');
+console.log(`websocket server started on port ${process.env.PORT2}`);
