@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userDetails = exports.verifyOTP = exports.Login = exports.Signup = void 0;
+exports.userDetails = exports.recipentdetails = exports.verifyOTP = exports.Login = exports.Signup = void 0;
 const client_1 = require("@prisma/client");
 const zod_1 = require("zod");
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -125,13 +125,33 @@ const Login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.Login = Login;
 const userDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userid = parseInt(req.user.id);
+    const user = yield prisma.user.findUnique({
+        where: { id: userid }
+    });
+    if (!user) {
+        return res.status(401).json({ msg: "user not found" });
+    }
+    return res.status(200).json({ user });
+});
+exports.userDetails = userDetails;
+const recipentdetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userid = parseInt(req.user.id);
+        const userId = req.query.userId;
+        if (!userId || typeof userId !== 'string') {
+            return res.status(400).json({ msg: 'Invalid userId' });
+        }
+        const Id = Number(userId);
+        if (isNaN(Id)) {
+            return res.status(400).json({ msg: 'Invalid userId format' });
+        }
         const details = yield prisma.user.findUnique({
-            where: { id: userid }
+            where: {
+                id: Id,
+            },
         });
         if (!details) {
-            return res.status(404).json({ msg: "No user found" });
+            return res.status(404).json({ msg: 'No user found' });
         }
         return res.status(200).json(details);
     }
@@ -139,4 +159,4 @@ const userDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         console.log('invalid token / unauthorised', error);
     }
 });
-exports.userDetails = userDetails;
+exports.recipentdetails = recipentdetails;

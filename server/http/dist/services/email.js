@@ -24,8 +24,6 @@ const transporter = nodemailer_1.default.createTransport({
         user: process.env.EMAIL,
         pass: process.env.PASSWORD
     },
-    logger: true,
-    debug: true
 });
 const sendotp = (email, otp) => __awaiter(void 0, void 0, void 0, function* () {
     const mailOptions = {

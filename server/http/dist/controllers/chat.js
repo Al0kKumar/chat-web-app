@@ -13,13 +13,15 @@ const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const Chatsbetween = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const currentuserid = parseInt(req.user.id);
-    const otheruserid = parseInt(req.params.chatId);
+    const recipientid = parseInt(req.query.recipientId);
+    console.log("Current User ID:", currentuserid);
+    console.log("Recipient ID:", recipientid);
     try {
         const messages = yield prisma.messages.findMany({
             where: {
                 OR: [
-                    { senderid: currentuserid, receiverid: otheruserid },
-                    { senderid: otheruserid, receiverid: currentuserid },
+                    { senderid: currentuserid, receiverid: recipientid },
+                    { senderid: recipientid, receiverid: currentuserid },
                 ],
             },
             orderBy: {

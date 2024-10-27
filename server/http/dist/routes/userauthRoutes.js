@@ -10,5 +10,6 @@ const authmiddleware_1 = __importDefault(require("../middlewares/authmiddleware"
 router.post('/signup', userauth_1.Signup);
 router.post('/verify-otp', userauth_1.verifyOTP);
 router.post('/login', userauth_1.Login);
+router.get('/recipentdetails', authmiddleware_1.default, userauth_1.recipentdetails);
 router.get('/userDetails', authmiddleware_1.default, userauth_1.userDetails);
 exports.default = router;

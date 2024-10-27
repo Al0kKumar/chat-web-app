@@ -1,9 +1,10 @@
-import { Express, Request, RequestHandler, Response } from "express";
+import { Express, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import {z} from 'zod';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { getotp, sendotp } from "../services/email";
+import auth from "../middlewares/authmiddleware";
 
 const prisma = new PrismaClient()
 
@@ -155,18 +156,46 @@ const Login = async (req: Request, res: Response) => {
     return res.status(200).json({token})
 }
 
-const userDetails = async (req: Request,res: Response) => {
+
+const userDetails = async (req: Request, res: Response) => {
+
+    const userid = parseInt(req.user.id);
+
+    const user = await prisma.user.findUnique({
+        where:{id: userid }
+    })
+
+    if(!user){
+        return res.status(401).json({msg:"user not found"})
+    }
+    return res.status(200).json(user)
+}
+
+const recipentdetails = async (req: Request,res: Response) => {
    
     try {
-        const userid = parseInt(req.user.id);
-    
-        const details = await prisma.user.findUnique({
-            where:{id: userid}
-        })
+        const userId = req.query.userId;
 
-        if(!details){
-            return res.status(404).json({msg:"No user found"})
+        if (!userId || typeof userId !== 'string') {
+            return res.status(400).json({ msg: 'Invalid userId' });
         }
+
+        const Id = Number(userId);
+
+        if (isNaN(Id)) {
+            return res.status(400).json({ msg: 'Invalid userId format' });
+        }
+
+        const details = await prisma.user.findUnique({
+            where: {
+                id: Id, 
+            },
+        });
+
+        if (!details) {
+            return res.status(404).json({ msg: 'No user found' });
+        }
+
     
     
         return res.status(200).json(details)
@@ -177,4 +206,4 @@ const userDetails = async (req: Request,res: Response) => {
 } 
 
 
-export  { Signup, Login, verifyOTP, userDetails }
+export  { Signup, Login, verifyOTP, recipentdetails, userDetails }

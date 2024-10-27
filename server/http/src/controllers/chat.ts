@@ -5,15 +5,18 @@ const prisma = new PrismaClient()
 
 const Chatsbetween = async (req: Request,res: Response) => {
    
-    const currentuserid = parseInt(req.user.id)
-    const otheruserid = parseInt(req.params.chatId)
+  const currentuserid = parseInt(req.user.id);
+  const recipientid = parseInt(req.query.recipientId as string);
+
+  console.log("Current User ID:", currentuserid);
+  console.log("Recipient ID:", recipientid);
 
     try {
       const messages = await prisma.messages.findMany({
         where: {
           OR: [
-            { senderid: currentuserid, receiverid: otheruserid },
-            { senderid: otheruserid, receiverid: currentuserid },
+            { senderid: currentuserid, receiverid: recipientid },
+            { senderid: recipientid, receiverid: currentuserid },
           ],
         },
         orderBy: {
