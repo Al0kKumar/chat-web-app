@@ -15,73 +15,80 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ws_1 = require("ws");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
-require('dotenv').config();
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+console.log(`${process.env.JWT_SECRET_KEY}`);
 const prisma = new client_1.PrismaClient();
 const wss = new ws_1.WebSocketServer({ port: parseInt(process.env.PORT2) });
 const clients = new Map();
 wss.on('listening', () => {
-    console.log(`websocket server is running on port ${process.env.PORT2}`);
+    console.log(`WebSocket server is running on port ${process.env.PORT2}`);
 });
+console.log('WebSocket Server Port:', process.env.PORT2);
+console.log('JWT Secret:', process.env.JWT_SECRET_KEY);
 wss.on('connection', (ws, req) => __awaiter(void 0, void 0, void 0, function* () {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const token = url.searchParams.get('token');
+    var _a;
+    const urlParams = new URLSearchParams((_a = req.url) === null || _a === void 0 ? void 0 : _a.split('?')[1]);
+    const token = urlParams.get('token');
     if (!token) {
-        return ws.close(400, 'Token is not present');
+        console.error('Connection attempt without token');
+        return ws.close(1008, 'Token is not present');
     }
     let verified;
     try {
-        verified = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        verified = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET_KEY);
     }
     catch (error) {
-        return ws.close(4001, 'Invalid token');
+        console.error('Invalid token:', error);
+        return ws.close(1008, 'Invalid token');
     }
+    console.log('token is right ');
     const senderid = verified.id;
+    const existingSocket = clients.get(senderid);
+    if (existingSocket) {
+        console.log(`Closing existing connection for user: ${senderid}`);
+        existingSocket.terminate();
+    }
     clients.set(senderid, ws);
     console.log(`WebSocket connection established for user: ${senderid}`);
-    // check if the client has any unread messages 
-    try {
-        const unreadmsgs = yield prisma.messages.findMany({ where: { receiverid: senderid, isRead: false } });
-        ws.send(JSON.stringify({ unreadmsgs }));
-    }
-    catch (error) {
-        console.error('Error fetching unread messsages: ', error);
-    }
-    // received a message => parsed it into json , stored it into db, if state of the reciver is open so sent to that user 
-    ws.on('message', (message) => __awaiter(void 0, void 0, void 0, function* () {
-        if (typeof message === 'string') {
-            const parsedmessage = JSON.parse(message);
-            const { senderid, receiverid, content } = parsedmessage;
-            try {
-                yield prisma.messages.create({
-                    data: {
-                        senderid,
-                        receiverid,
-                        content,
-                    }
-                });
-            }
-            catch (error) {
-                console.error('Error storing message:', error);
-                ws.send(JSON.stringify({ error: 'Failed to send message' }));
+    // Send initial welcome message
+    ws.send(JSON.stringify({ message: 'Welcome from WebSocket server' }));
+    // Fetch and send unread messages
+    // try {
+    //     const unreadMsgs = await prisma.messages.findMany({ where: { receiverid: senderid, isRead: false } });
+    //     ws.send(JSON.stringify({ unreadMsgs }));
+    // } catch (error) {
+    //     console.error('Error fetching unread messages:', error);
+    // }
+    // Handle incoming messages
+    ws.on('message', (data) => __awaiter(void 0, void 0, void 0, function* () {
+        console.log(`message recived  from`, data.toString());
+        try {
+            const parsedMessage = JSON.parse(data.toString());
+            const { senderid, receiverid, content } = parsedMessage;
+            if (!senderid || !receiverid || !content)
                 return;
+            const receiverSocket = clients.get(receiverid);
+            if (receiverSocket) {
+                receiverSocket.send(JSON.stringify(Object.assign({}, parsedMessage)));
             }
-            // get the websocket connection id of the recipent 
-            // to whom the message is to be sent
-            const receiversocket = clients.get(receiverid);
-            if (receiversocket) {
-                // send the message to the recipent 
-                receiversocket.send(JSON.stringify(parsedmessage));
-                yield prisma.messages.updateMany({
-                    where: { senderid: senderid, receiverid: receiverid, isRead: false },
-                    data: { isRead: true }
-                });
-            }
+            yield prisma.messages.create({
+                data: {
+                    senderid,
+                    receiverid,
+                    content
+                },
+            });
+            console.log('message saved to database');
+        }
+        catch (error) {
+            console.error('Error processing message:', error);
+            ws.send(JSON.stringify({ error: 'Failed to process message' }));
         }
     }));
-    ws.on('close', () => {
-        console.log('client disconnected');
+    // Handle disconnection
+    ws.on('close', (code, reason) => {
+        console.log(`Client ${senderid} disconnected with : ${code}, reason: ${reason}`);
         clients.delete(senderid);
     });
-    ws.send('welcome from web socket ');
 }));
-console.log(`websocket server started on port ${process.env.PORT2}`);
