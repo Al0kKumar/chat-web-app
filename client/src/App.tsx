@@ -15,7 +15,7 @@ function App() {
         <Route path='/otp' element={<OtpPage/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/dashboard' element={<Dashboard/>}/>
-        <Route path='/chat' element={<Chats/>}/>
+        <Route path='/chats/:userId' element={<Chats/>}/>
       </Routes>
     </Router>
   )

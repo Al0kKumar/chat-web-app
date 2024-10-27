@@ -7,30 +7,29 @@ interface MessageInputProps {
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({ onSend}) => {
-  const [message, setMessage] = useState('');
+  const [inputValue, setInputValue] = useState("");
 
-  const handleSend = () => {
-    if (message.trim() === '') return; // Prevent sending empty messages
-    onSend(message);
-    setMessage(''); // Clear input after sending
+  const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (inputValue.trim()) {
+          onSend(inputValue);
+          setInputValue(""); // Clear the input field after sending
+      }
   };
 
   return (
-    <div className="flex p-4 border-t border-gray-300 bg-white">
-      <input
+    <form onSubmit={handleSubmit} className="flex p-4 bg-white border-t">
+    <input
         type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        className="flex-1 p-2 border rounded-full border-gray-300"
         placeholder="Type a message..."
-        className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none"
-      />
-      <button
-        onClick={handleSend}
-        className="ml-2 p-2 bg-blue-500 text-white rounded-lg"
-      >
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+    />
+    <button type="submit" className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-full">
         Send
-      </button>
-    </div>
+    </button>
+</form>
   );
 };
 

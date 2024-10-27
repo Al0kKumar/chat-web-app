@@ -51,7 +51,7 @@ const Dashboard = () => {
   };
 
   const handleChatClick = (chatId: number) => {
-    navigate(`/chats/?${chatId}`);
+    navigate(`/chats/${chatId}`);
   };
 
   return (

@@ -1,18 +1,13 @@
-import react from 'react'
-
-
-interface propstype{
+interface header{
     name : string
 }
 
-const ChatHeader = (props:propstype) => {
-
+const ChatHeader = ({ name }: header) => {
     return (
-        <div className='flex-initial bg-slate-800 sticky'>
-           <div className='text-white'>{props.name}</div>
-           <div></div>
+        <div className="bg-gray-800 p-4 text-white">
+            <h2 className="text-xl font-semibold">{name}</h2>
         </div>
-    )
-}
+    );
+};
 
 export default ChatHeader;
