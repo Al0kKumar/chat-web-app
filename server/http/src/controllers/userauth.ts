@@ -10,10 +10,10 @@ const prisma = new PrismaClient()
 
 
 const userSchema = z.object({
-    name : z.string(),
-    email : z.string(),
-    phoneNumber: z.string(),
-    password:z.string()
+    name : z.string().min(3,"Name must be at least 3 characters long"),
+    email : z.string().min(2, "email must be at least 3 characters long"),
+    phoneNumber: z.string().min(5, "phonenumber must be at least 3 characters long"),
+    password:z.string().min(2, "password must be at least 2 characters long")
 })  
 
 
@@ -119,8 +119,8 @@ const verifyOTP = async (req: Request, res: Response) => {
 }
 
 const loginSchema = z.object({
-    email:z.string(),
-    password:z.string()
+    email:z.string().min(4, "email must be at least 3 characters long"),
+    password:z.string().min(3, "password must be at least 3 characters long")
 })
 
 const Login = async (req: Request, res: Response) => {
@@ -147,7 +147,7 @@ const Login = async (req: Request, res: Response) => {
     const isPasswordValid = await bcrypt.compare(password, checkuser.password);
 
     if(!isPasswordValid){
-        return res.status(401).json({msg:"wrong password"})
+        return res.status(404).json({msg:"wrong password"})
     }
 
     const token = jwt.sign({id: checkuser.id},process.env.JWT_SECRET_KEY )

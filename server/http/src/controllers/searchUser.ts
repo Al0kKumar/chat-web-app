@@ -6,47 +6,27 @@ const prisma = new PrismaClient()
 
 const search = async  (req: Request, res: Response) => {
     
-    const  phoneNumber  = req.query.phone as string;
+    const  phoneNumber  = String(req.query.phone);
 
     try {
-        const users = await prisma.user.findUnique({
-            where:{phoneNumber: phoneNumber}
-        }) 
+        // Find all users matching the search term, excluding the current user
+        const users = await prisma.user.findMany({
+          where: {phoneNumber: phoneNumber},
+          select: {
+            id: true,
+            name: true,
+            phoneNumber: true,
+          },
+          orderBy: {
+            name: 'asc' // Sort results by name for easy searching
+          }
+        });
     
-        if(!users){
-            return res.status(404).json({msg:"User not found"})
-        }
-    
-        const lastMessage = await prisma.messages.findFirst({
-            where: {
-              OR: [
-                { senderid: users.id },
-                { receiverid: users.id },
-              ],
-            },
-            orderBy: {
-              timestamp: 'desc',
-            },
-            select: {
-              content: true,
-              timestamp: true, // Include timestamp if you want to access it later
-            },
-          });
-          
-          const chat = {
-            id: users.id,
-            username: users.name,
-            phoneNumber: users.phoneNumber,
-            lastMessage: lastMessage
-              ? { content: lastMessage.content, timestamp: lastMessage.timestamp }
-              : { content: 'No messages', timestamp: null },
-          };
-    
-        res.json(chat)
-    } catch (error) {
-        console.error("Error searching chats:", error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+        res.json(users);
+      } catch (error) {
+        console.error('Error searching users:', error);
+        res.status(500).json({ error: 'An error occurred while searching for users.' });
+      }
 
 }
 
@@ -55,39 +35,61 @@ const getAllchats = async (req: Request, res: Response) => {
    
     const userid = parseInt(req.user.id);
 
-     const users = await prisma.user.findMany({
-        where: { NOT: { id: userid } },
-        select: { id: true, name: true, phoneNumber: true } // Select fields you want
-    });
 
-    const chats = await Promise.all(users.map(async (user) => {
-        const lastMessage = await prisma.messages.findFirst({
-            where: {
-                OR: [
-                    { senderid: userid, receiverid: user.id },
-                    { senderid: user.id, receiverid: userid },
-                ],
-            },
-            orderBy: {
-                timestamp: 'desc', // Adjust to your timestamp field
-            },
+    const chats = await prisma.messages.findMany({
+        where: {
+          OR: [
+            { senderid: userid},
+            { receiverid: userid }
+          ]
+        },
+        orderBy: {
+          timestamp: 'desc' // Order by latest message timestamp
+        }
+      });
+  
+      // Extract unique chat partners and last message for each
+      const uniqueChats = [];
+      const seenUserIds = new Set();
+  
+      for (const chat of chats) {
+        // Determine the chat partner
+        const partnerId = chat.senderid === userid ? chat.receiverid : chat.senderid;
+  
+        if (!seenUserIds.has(partnerId)) {
+          const partner = await prisma.user.findUnique({
+            where: { id: partnerId },
             select: {
-                content: true,
-                timestamp: true, // Include the timestamp field
+              id: true,
+              name: true,
+              phoneNumber: true,
+            }
+          });
+  
+          const lastMessage = await prisma.messages.findFirst({
+            where: { 
+              OR: [
+                { senderid: userid, receiverid: partnerId },
+                { senderid: partnerId, receiverid: userid }
+              ]
             },
-        });
-    
-        return {
-            userid: user.id,
-            userName: user.name,
-            phoneNumber: user.phoneNumber,
-            lastMessage: lastMessage ? lastMessage.content : null, // Get last message content
-            lastMessageTime: lastMessage ? lastMessage.timestamp: null, // Get last message timestamp
-        };
-    }));
-    
-
-    res.status(200).json(chats);
+            orderBy: { timestamp: 'desc' },
+            select: { content: true, timestamp: true }
+          });
+  
+          uniqueChats.push({
+            userid: partner.id,
+            userName: partner.name,
+            phoneNumber: partner.phoneNumber,
+            lastMessage: lastMessage.content,
+            lastMessageTime: lastMessage.timestamp
+          });
+  
+          seenUserIds.add(partnerId);
+        }
+      }
+  
+      res.json(uniqueChats);
 
 
 }

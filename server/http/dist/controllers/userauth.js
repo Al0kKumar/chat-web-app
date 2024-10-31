@@ -20,10 +20,10 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const email_1 = require("../services/email");
 const prisma = new client_1.PrismaClient();
 const userSchema = zod_1.z.object({
-    name: zod_1.z.string(),
-    email: zod_1.z.string(),
-    phoneNumber: zod_1.z.string(),
-    password: zod_1.z.string()
+    name: zod_1.z.string().min(3, "Name must be at least 3 characters long"),
+    email: zod_1.z.string().min(2, "email must be at least 3 characters long"),
+    phoneNumber: zod_1.z.string().min(5, "phonenumber must be at least 3 characters long"),
+    password: zod_1.z.string().min(2, "password must be at least 2 characters long")
 });
 const Signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const check = userSchema.safeParse(req.body);
@@ -99,8 +99,8 @@ const verifyOTP = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.verifyOTP = verifyOTP;
 const loginSchema = zod_1.z.object({
-    email: zod_1.z.string(),
-    password: zod_1.z.string()
+    email: zod_1.z.string().min(4, "email must be at least 3 characters long"),
+    password: zod_1.z.string().min(3, "password must be at least 3 characters long")
 });
 const Login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const check = loginSchema.safeParse(req.body);
@@ -118,7 +118,7 @@ const Login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     const isPasswordValid = yield bcrypt_1.default.compare(password, checkuser.password);
     if (!isPasswordValid) {
-        return res.status(401).json({ msg: "wrong password" });
+        return res.status(404).json({ msg: "wrong password" });
     }
     const token = jsonwebtoken_1.default.sign({ id: checkuser.id }, process.env.JWT_SECRET_KEY);
     return res.status(200).json({ token });
@@ -132,7 +132,7 @@ const userDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     if (!user) {
         return res.status(401).json({ msg: "user not found" });
     }
-    return res.status(200).json({ user });
+    return res.status(200).json(user);
 });
 exports.userDetails = userDetails;
 const recipentdetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
