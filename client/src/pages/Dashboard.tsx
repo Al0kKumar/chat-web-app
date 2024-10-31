@@ -17,10 +17,11 @@ const Dashboard = () => {
   const [search, setSearch] = useState('');
   const [chats, setChats] = useState<Chat[]>([]);
   const [filteredChats, setFilteredChats] = useState<Chat[]>([]);
+  
+  const token = localStorage.getItem('token');
 
   const fetchChats = async (searchTerm: string) => {
     try {
-      const token = localStorage.getItem('token');
       const response = await axios.get('http://localhost:3000/api/v1/getchats', {
         headers: { 'Authorization': `Bearer ${token}` },
         params: { search: searchTerm } // Send search term
@@ -33,6 +34,16 @@ const Dashboard = () => {
       navigate('/login');
     }
   };
+
+  useEffect(() => {
+     const lastMessageTime = () => {
+      const res = axios.get('http://localhost:3000/api/v1/lastmessage',{
+        headers:{'Authorization' : `Bearer ${token}`}
+      })
+
+
+     }
+  },[])
 
   useEffect(() => {
     fetchChats(''); // Fetch all chats on initial load
@@ -80,7 +91,10 @@ const Dashboard = () => {
                 </div>
 
                 {/* Timestamp Placeholder (optional) */}
-                <div className="text-xs text-gray-400">2h ago</div> {/* Example timestamp */}
+                <div className="text-xs text-gray-400">{chat.lastMessage ? new Date(chat.lastMessageTime as string).toLocaleTimeString([],{
+                  hour:'2-digit',
+                  minute:"2-digit"
+                }) : ''}</div> {/* Example timestamp */}
             </div>
         ))
     ) : (
