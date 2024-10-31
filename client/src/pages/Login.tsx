@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import FullWidthTextField from '../components/MUIinput';
 import ButtonSizes from '../components/MUIbutton';
 import { useNavigate } from 'react-router-dom';
+import CustomInput from '../components/CustomInput';
+import { Link } from 'react-router-dom';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false); // State to manage loading
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault(); // Prevent form submission default behavior
-        setLoading(true); // Start loading
-        setError(''); // Clear previous errors
+        e.preventDefault();
+        setLoading(true);
+        setError('');
 
         try {
             const response = await axios.post('http://localhost:3000/api/v1/login', {
@@ -24,44 +25,52 @@ const Login: React.FC = () => {
             });
 
             if (response.data.token) {
-                localStorage.setItem('token', response.data.token); // Store token in local storage
-                navigate('/dashboard'); // Redirect to dashboard
+                localStorage.setItem('token', response.data.token);
+                navigate('/dashboard');
             } else {
                 setError('Invalid credentials'); // Handle invalid credentials
             }
         } catch (error: any) {
             console.error('Login error:', error.message);
-            setError('Login failed. Please try again.'); // Provide more context in error message
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                setError('Incorrect email or password.'); // Specific 401 error message
+            } else {
+                setError('Login failed. Please try again.'); // General error message
+            }
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
     };
 
     return (
-        <div className='flex flex-col justify-center items-center h-screen'>
+        <div className='bg-slate-900 flex flex-col justify-center items-center h-screen'>
             <div className='w-full max-w-md'>
-                <form onSubmit={handleSubmit}> {/* Use form element for better accessibility */}
+                <form onSubmit={handleSubmit}>
                     <div className='p-4'>
-                        <FullWidthTextField 
-                            label='Enter Email' 
-                            type='email' 
-                            value={email} 
-                            onChange={(e) => setEmail(e.target.value)} 
+                        <CustomInput
+                            type='email'
+                            placeholder='Enter email'
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
                     <div className='p-4'>
-                        <FullWidthTextField 
-                            label='Enter Password' 
-                            type='password' 
-                            value={password} 
-                            onChange={(e) => setPassword(e.target.value)} 
+                        <CustomInput
+                            type='password'
+                            placeholder='Enter password'
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    {error && <p className='text-red-500'>{error}</p>} {/* Display error message */}
+                    {/* Display error message */}
+                    {error && <p className='text-red-500 text-center mt-2'>{error}</p>}
+                    <div className='flex justify-center text-white '> 
+                    <div >
+                    have not signed up ? <Link to='/' className="text-blue-500 underline"> Signup</Link>
+                    </div>
+                </div>
                     <div className='p-4 flex justify-center'>
-                        <ButtonSizes 
-                            label={loading ? 'Logging in...' : 'Login'}
-                        />
+                        <ButtonSizes label={loading ? 'Logging in...' : 'Login'} />
                     </div>
                 </form>
             </div>

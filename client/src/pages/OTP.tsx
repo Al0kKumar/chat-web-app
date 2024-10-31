@@ -43,8 +43,8 @@ const OtpPage: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-            <h1 className="text-2xl font-semibold mb-4">Enter OTP</h1>
+        <div className="bg-slate-900 flex flex-col items-center justify-center h-screen ">
+            <h1 className="text-2xl font-semibold mb-4 text-white">Please enter the verification code sent to your email address {email}</h1>
             <OTPInput value={OTP} onChange={setOTP} />
             {error && <p className="mt-2 text-red-500">{error}</p>}
             <button

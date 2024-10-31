@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import OtpPage from './pages/OTP';
 import Dashboard from './pages/Dashboard';
 import Chats from './pages/Chats'
+import './index.css'
 
 function App() {
 

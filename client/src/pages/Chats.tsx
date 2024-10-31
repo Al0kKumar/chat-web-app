@@ -51,6 +51,7 @@ const Chats = () => {
                     params: { userId },
                     headers:{Authorization: `Bearer ${token}`}
                 });
+                
                 setRecipientName(res.data.name);
             } catch (error) {
                 console.error("Error fetching recipient name:", error);
@@ -68,8 +69,9 @@ const Chats = () => {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 console.log('data fetched from api',res.data);
+                console.log('username is',res.data.name);
                 
-                setCurrentUser(res.data.user);
+                setCurrentUser(res.data);
             } catch (error) {
                 console.error("Failed to fetch user info", error);
             }
@@ -151,7 +153,7 @@ const Chats = () => {
     return (
         <div className="flex flex-col h-screen bg-blue-600">
             {/* Top Bar */}
-            <ChatHeader name={recipientName}/>
+            <ChatHeader name={recipientName} onBack={() => history.back()}/>
 
             <div className="flex-1  p-4 bg-slate-700 overflow-y-auto">
                 <div className="flex flex-col space-y-2">

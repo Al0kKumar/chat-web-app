@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import FullWidthTextField from '../components/MUIinput';
 import ButtonSize from '../components/MUIbutton';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import CustomInput from '../components/CustomInput';
+import { Link } from 'react-router-dom';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -10,29 +11,33 @@ const Signup = () => {
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null); 
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: any) => {
-        e.preventDefault(); // Prevent default form submission behavior
-        setError(null);
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null); // Reset error state on each submit
         setLoading(true);
 
-        const formData = {
-            name,
-            email,
-            phoneNumber,
-            password,
-        };
-
+        const formData = { name, email, phoneNumber, password };
         localStorage.setItem('email', email);
 
         try {
-            console.log('Sending signup request with data:', formData); // Logging request data for debugging
+            console.log('Sending signup request with data:', formData);
             const response = await axios.post('http://localhost:3000/api/v1/signup', formData);
             console.log('Signup successful:', response.data);
-            navigate('/otp', { state: { email } }); // Navigate to OTP page and pass email
-        } catch (err) {
+            navigate('/otp', { state: { email } });
+        } catch (err: any) {
+            if (axios.isAxiosError(err) && err.response) {
+                // Check for a 401 status code
+                if (err.response.status === 401) {
+                    setError('Incorrect or incomplete information. Please check your inputs.');
+                } else {
+                    setError('An error occurred. Please try again later.');
+                }
+            } else {
+                setError('An unexpected error occurred.');
+            }
             console.error('Error during signup:', err);
         } finally {
             setLoading(false);
@@ -40,43 +45,50 @@ const Signup = () => {
     };
 
     return (
-        <div className="flex flex-col justify-center items-center h-screen">
+        <div className="bg-slate-900 flex flex-col justify-center items-center h-screen">
             <form className="w-full max-w-md" onSubmit={handleSubmit}>
                 <div className="p-3">
-                    <FullWidthTextField
-                        label="Name"
+                    <CustomInput
                         type="text"
+                        placeholder="Enter name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                     />
                 </div>
                 <div className="p-3">
-                    <FullWidthTextField
-                        label="Email"
+                    <CustomInput
                         type="email"
+                        placeholder="Enter email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
                 <div className="p-3">
-                    <FullWidthTextField
-                        label="Phone Number"
+                    <CustomInput
                         type="tel"
+                        placeholder="Enter phone number"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                     />
                 </div>
                 <div className="p-3">
-                    <FullWidthTextField
-                        label="Password"
+                    <CustomInput
                         type="password"
+                        placeholder="Enter password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
-                {error && <p className="text-red-500">{error}</p>}
+                {/* Display error message */}
+                {error && <p className="text-red-500 text-center mt-2">{error}</p>}
+
+                <div className='flex justify-center text-white '> 
+                    <div >
+                    Already signedin ? <Link to='/login' className="text-blue-500 underline"> login</Link>
+                    </div>
+                </div>
                 <div className="p-3 flex justify-center">
-                    <ButtonSize label={loading ? 'Signing Up...' : 'Signup'} /> {/* Removed onClick */}
+                    <ButtonSize label={loading ? 'Signing Up...' : 'Signup'} />
                 </div>
             </form>
         </div>

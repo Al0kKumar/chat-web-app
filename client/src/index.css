@@ -11,3 +11,8 @@
   .received {
     text-align: left; /* Align received messages to the left */
   }
+
+  .custom-input::placeholder {
+    color: white; /* Placeholder color */
+    opacity: 1; /* Ensure the opacity is fully opaque */
+  }
