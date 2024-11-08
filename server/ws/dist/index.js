@@ -42,7 +42,7 @@ wss.on('connection', (ws, req) => __awaiter(void 0, void 0, void 0, function* ()
         console.error('Invalid token:', error);
         return ws.close(1008, 'Invalid token');
     }
-    console.log('token is right ');
+    console.log('connection established ');
     const senderid = verified.id;
     const existingSocket = clients.get(senderid);
     if (existingSocket) {
@@ -53,16 +53,19 @@ wss.on('connection', (ws, req) => __awaiter(void 0, void 0, void 0, function* ()
     console.log(`WebSocket connection established for user: ${senderid}`);
     // Send initial welcome message
     ws.send(JSON.stringify({ message: 'Welcome from WebSocket server' }));
-    // Fetch and send unread messages
-    // try {
-    //     const unreadMsgs = await prisma.messages.findMany({ where: { receiverid: senderid, isRead: false } });
-    //     ws.send(JSON.stringify({ unreadMsgs }));
-    // } catch (error) {
-    //     console.error('Error fetching unread messages:', error);
-    // }
+    try {
+        const unreadMsgs = yield prisma.messages.findMany({ where: { receiverid: senderid, isRead: false } });
+        if (unreadMsgs.length > 0) {
+            ws.send(JSON.stringify({ unreadMsgs }));
+        }
+    }
+    catch (error) {
+        console.error('Error fetching unread messages:', error);
+    }
     // Handle incoming messages
+    console.log('message on the way to be received');
     ws.on('message', (data) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log(`message recived  from`, data.toString());
+        console.log(`message recived  from client `, data.toString());
         try {
             const parsedMessage = JSON.parse(data.toString());
             const { senderid, receiverid, content } = parsedMessage;
@@ -91,4 +94,12 @@ wss.on('connection', (ws, req) => __awaiter(void 0, void 0, void 0, function* ()
         console.log(`Client ${senderid} disconnected with : ${code}, reason: ${reason}`);
         clients.delete(senderid);
     });
+    const keepAliveInterval = setInterval(() => {
+        if (ws.readyState === ws.OPEN) {
+            ws.ping();
+        }
+        else {
+            clearInterval(keepAliveInterval);
+        }
+    }, 30000);
 }));
