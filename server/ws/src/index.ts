@@ -6,8 +6,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 
-console.log(`${process.env.JWT_SECRET_KEY}`)
-
 const prisma = new PrismaClient();
 const wss = new WebSocketServer({ port: parseInt(process.env.PORT2) });
 const clients = new Map<number, WebSocket>();
@@ -15,9 +13,9 @@ const clients = new Map<number, WebSocket>();
 wss.on('listening', () => {
     console.log(`WebSocket server is running on port ${process.env.PORT2}`);
 });
+    
 
-console.log('WebSocket Server Port:', process.env.PORT2);
-console.log('JWT Secret:', process.env.JWT_SECRET_KEY);
+
 
 
 wss.on('connection', async (ws, req) => {
