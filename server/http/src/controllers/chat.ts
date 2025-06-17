@@ -3,9 +3,10 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 
+// get all messages between two users 
 const Chatsbetween = async (req: Request,res: Response) => {
    
-  const currentuserid = parseInt(req.user.id);
+  const currentuserid = typeof req.user.id === 'string' ? parseInt(req.user.id) : req.user.id;
   const recipientid = parseInt(req.query.recipientId as string);
 
   console.log("Current User ID:", currentuserid);

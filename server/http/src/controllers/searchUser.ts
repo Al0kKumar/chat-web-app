@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient()
 
 
+// bro make in regex to work smoothly
 const search = async  (req: Request, res: Response) => {
     
     const  phoneNumber  = String(req.query.phone);
@@ -30,10 +31,10 @@ const search = async  (req: Request, res: Response) => {
 
 }
 
-// get all chats with the users
+// get all chats with the users/ conversations
 const getAllchats = async (req: Request, res: Response) => {
    
-    const userid = parseInt(req.user.id);
+    const userid = Number(req.user.id);
 
 
     const chats = await prisma.messages.findMany({
@@ -90,8 +91,6 @@ const getAllchats = async (req: Request, res: Response) => {
       }
   
       res.json(uniqueChats);
-
-
 }
 
 

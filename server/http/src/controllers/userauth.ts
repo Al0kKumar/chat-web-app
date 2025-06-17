@@ -159,7 +159,7 @@ const Login = async (req: Request, res: Response) => {
 
 const userDetails = async (req: Request, res: Response) => {
 
-    const userid = parseInt(req.user.id);
+    const userid = req.user.id as number;
 
     const user = await prisma.user.findUnique({
         where:{id: userid }
