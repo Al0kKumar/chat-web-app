@@ -34,10 +34,18 @@ const Signup = async  (req: Request, res: Response) => {
     })
 
     if(userexists){
-        return res.status(400).json({
+        return res.status(409).json({
             msg:"user already exists with this email "
         })
     }
+
+    const existingUser = await prisma.user.findUnique({
+       where: { phoneNumber },
+    });
+
+        if (existingUser) {
+        return res.status(409).json({ msg: 'Phone number already registered' });
+        }
 
     const hashedpassword = await bcrypt.hash(password,10);
 

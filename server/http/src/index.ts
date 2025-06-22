@@ -1,3 +1,4 @@
+import http from "http";
 import express from 'express';
 import cors from 'cors'
 import chatroutes from './routes/chatRoute'
@@ -10,6 +11,7 @@ import dotenv from 'dotenv';
 
 
 const app = express();
+const prisma = new PrismaClient();
 
 app.use(cors());
 
@@ -24,9 +26,10 @@ app.use('/api/v1', searchroutes)
 
 dotenv.config();
 
+const server = http.createServer(app);
 
-const prisma = new PrismaClient();
-const wss = new WebSocketServer({ port: parseInt(process.env.PORT) });
+const wss = new WebSocketServer({ server });
+
 const clients = new Map<number, WebSocket>();
 
 wss.on('listening', () => {
@@ -141,7 +144,7 @@ wss.on('connection', async (ws, req) => {
 
 
 
-app.listen(process.env.PORT1, () => {
+server.listen(process.env.PORT, () => {
     console.log(`server is running on port ${process.env.PORT}`);
      
 })
