@@ -1,11 +1,11 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { MessageSquare, Search, Send, Phone, MoreVertical } from 'lucide-react';
+import { MessageSquare, Search, Send, Phone, MoreVertical, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import ChatWindow from '@/components/ChatWindow';
+import { usePhoneSearch } from '@/hooks/usePhoneSearch';
 
 interface Conversation {
   id: string;
@@ -83,10 +83,41 @@ const Dashboard = () => {
     }
   ];
 
+  const { searchResults, isSearching, searchByPhone, clearSearch } = usePhoneSearch();
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim() && /^\+?\d+/.test(searchQuery)) {
+        // Only search if query looks like a phone number
+        searchByPhone(searchQuery);
+      } else {
+        clearSearch();
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, searchByPhone, clearSearch]);
+
   const filteredConversations = conversations.filter(conv =>
     conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     conv.phone.includes(searchQuery)
   );
+
+  const handleConversationSelect = (conversation: Conversation | any) => {
+    // Convert search result to conversation format if needed
+    const normalizedConversation: Conversation = {
+      id: conversation.id,
+      name: conversation.name,
+      phone: conversation.phone,
+      lastMessage: conversation.lastMessage || '',
+      lastMessageTime: conversation.lastMessageTime || 'Now',
+      unreadCount: conversation.unreadCount || 0,
+      avatar: conversation.avatar,
+      isOnline: conversation.isOnline
+    };
+    setSelectedConversation(normalizedConversation);
+  };
 
   return (
     <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
@@ -107,17 +138,76 @@ const Dashboard = () => {
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
+            {isSearching && (
+              <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300 animate-spin" />
+            )}
             <Input
               placeholder="Search by phone number or name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300 focus:bg-white/15"
+              className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300 focus:bg-white/15"
             />
           </div>
         </div>
 
         {/* Conversations List */}
         <div className="flex-1 overflow-y-auto">
+          {/* Search Results */}
+          {searchResults.length > 0 && (
+            <div className="border-b border-white/10">
+              <div className="p-2 bg-white/5">
+                <h3 className="text-sm font-medium text-purple-300 px-2">Search Results</h3>
+              </div>
+              {searchResults.map((result) => (
+                <div
+                  key={result.id}
+                  onClick={() => handleConversationSelect(result)}
+                  className="p-4 border-b border-white/5 cursor-pointer transition-all duration-200 hover:bg-white/10"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={result.avatar} />
+                        <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                          {result.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      {result.isOnline && (
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900"></div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-white truncate">{result.name}</h3>
+                        {result.lastMessageTime && (
+                          <span className="text-xs text-purple-300">{result.lastMessageTime}</span>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-1">
+                          <Phone className="h-3 w-3 text-purple-400" />
+                          <span className="text-xs text-purple-300">{result.phone}</span>
+                        </div>
+                        {result.unreadCount > 0 && (
+                          <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                            {result.unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <p className="text-sm text-purple-200 truncate mt-1">
+                        {result.lastMessage || 'No messages yet'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Existing Conversations */}
           {filteredConversations.map((conversation) => (
             <div
               key={conversation.id}

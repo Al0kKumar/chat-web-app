@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Send, Phone, Video, MoreVertical } from 'lucide-react';
+import ProfileInfo from './ProfileInfo';
 
 interface Conversation {
   id: string;
@@ -31,6 +32,7 @@ interface ChatWindowProps {
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, onBack }) => {
   const [newMessage, setNewMessage] = useState('');
+  const [showProfileInfo, setShowProfileInfo] = useState(false);
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -47,6 +49,23 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, onBack 
     }
   };
 
+  const handleProfileClick = () => {
+    setShowProfileInfo(true);
+  };
+
+  const handleProfileInfoBack = () => {
+    setShowProfileInfo(false);
+  };
+
+  if (showProfileInfo) {
+    return (
+      <ProfileInfo 
+        conversation={conversation} 
+        onBack={handleProfileInfoBack}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-white/5 backdrop-blur-lg">
       {/* Chat Header */}
@@ -61,7 +80,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, onBack 
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <div className="relative">
+          <div 
+            className="relative cursor-pointer"
+            onClick={handleProfileClick}
+          >
             <Avatar className="h-10 w-10">
               <AvatarImage src={conversation.avatar} />
               <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
@@ -73,8 +95,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, onBack 
             )}
           </div>
           
-          <div className="flex-1">
-            <h3 className="font-semibold text-white">{conversation.name}</h3>
+          <div 
+            className="flex-1 cursor-pointer"
+            onClick={handleProfileClick}
+          >
+            <h3 className="font-semibold text-white hover:text-purple-200 transition-colors">
+              {conversation.name}
+            </h3>
             <p className="text-sm text-purple-300">
               {conversation.isOnline ? 'Online' : 'Last seen recently'}
             </p>
