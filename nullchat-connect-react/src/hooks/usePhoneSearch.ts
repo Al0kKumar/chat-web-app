@@ -27,7 +27,7 @@ export const usePhoneSearch = () => {
     setIsSearching(true);
 
     try {
-      const res = await API.get('/api/v1/search', {
+      const res = await API.get('/search', {
         params: { phone: trimmed },
       });
 
