@@ -30,7 +30,7 @@ const OtpVerification = () => {
 
       // Decide where to go next
       if (from === 'google') {
-        navigate('/phonecollection');
+        navigate('/phone-collection');
       } else {
         navigate('/dashboard');
       }

@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, MessageSquare } from 'lucide-react';
 import API from '@/api'; // using your wrapper
+import { useGoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -31,8 +32,7 @@ const Login = () => {
       const res = await API.post('/auth/login', formData);
       console.log('Login successful:', res.data);
 
-      // Save token / user data if needed
-      // localStorage.setItem("token", res.data.token);
+      localStorage.setItem("token", res.data.token);
 
       navigate('/dashboard');
     } catch (err: any) {
@@ -43,8 +43,42 @@ const Login = () => {
     }
   };
 
+  
+   const googleLogin = useGoogleLogin({
+     onSuccess: async (tokenResponse) => {
+      try {
+        const res = await API.post('/auth/google', {
+          token: tokenResponse.access_token,
+        });
+  
+        const { user, token, status } = res.data;
+  
+        if (status === "existing") {
+          localStorage.setItem("token", token);
+          navigate('/dashboard');
+        } else if (status === "incomplete") {
+          // No phone number yet
+          navigate('/phone-collection', {
+            state: { email: user.email }
+          });
+        } else {
+          // new user
+          navigate('/verify-otp', {
+            state: { from: 'google', email: user.email },
+          });
+        }
+  
+      } catch (err) {
+        console.error('Google login failed:', err.response?.data || err.message);
+        alert('Google login failed');
+      }
+    }
+  });
+  
+      
+
   const handleGoogleLogin = () => {
-    window.location.href = `http://localhost:3000/auth/google`;
+    googleLogin();
   };
 
   return (

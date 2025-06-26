@@ -20,7 +20,12 @@ const ChatPage = () => {
   useEffect(() => {
     if (!token || !user.id) return;
 
-    const ws = new WebSocket(`${import.meta.env.VITE_WS_URL}?token=${token}`);
+    let ws: WebSocket;
+    let reconnectAttempts = 0;
+
+    const connect = () => {
+
+    ws = new WebSocket(`${import.meta.env.VITE_WS_URL}?token=${token}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -53,7 +58,15 @@ const ChatPage = () => {
 
     ws.onclose = () => {
       console.log('❌ WebSocket disconnected');
+      if(reconnectAttempts < 5){
+        setTimeout(connect, 1000* Math.pow(2,reconnectAttempts++));
+      }
     };
+
+  };
+
+    
+  connect();
 
     return () => {
       ws.close();

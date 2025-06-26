@@ -10,8 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 
 
-
-
 const Signup = () => {
      
   const navigate = useNavigate();
@@ -54,18 +52,32 @@ const Signup = () => {
   };
 
 
-  const googleLogin = useGoogleLogin({
-  onSuccess: async (tokenResponse) => {
+ 
+
+ const googleLogin = useGoogleLogin({
+   onSuccess: async (tokenResponse) => {
+    console.log("Google token response:", tokenResponse);
     try {
       const res = await API.post('/auth/google', {
         token: tokenResponse.access_token,
       });
 
-      // Send OTP (assumed to be triggered server-side already)
-      // Navigate to OTP screen
-      navigate('/verify-otp', {
-        state: { from: 'google', email: res.data.user.email },
-      });
+      const { user, token, status } = res.data;
+
+      if (status === "existing") {
+        localStorage.setItem("token", token);
+        navigate('/dashboard');
+      } else if (status === "incomplete") {
+        // No phone number yet
+        navigate('/phone-collection', {
+          state: { email: user.email }
+        });
+      } else {
+        // new user
+        navigate('/verify-otp', {
+          state: { from: 'google', email: user.email },
+        });
+      }
 
     } catch (err) {
       console.error('Google login failed:', err.response?.data || err.message);
@@ -73,6 +85,7 @@ const Signup = () => {
     }
   }
 });
+
     
 
   const handleGoogleSignup = () => {

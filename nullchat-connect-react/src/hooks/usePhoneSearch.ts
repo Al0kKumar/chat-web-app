@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 
 interface SearchResult {
@@ -18,62 +17,50 @@ export const usePhoneSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
 
   const searchByPhone = async (phoneNumber: string) => {
-    if (!phoneNumber.trim()) {
+    const trimmed = phoneNumber.trim();
+    if (!trimmed || !/^\+?\d+$/.test(trimmed)) {
       setSearchResults([]);
       return;
     }
 
     setIsSearching(true);
-    
+
     try {
-      // Mock API call - replace with your actual endpoint
-      const response = await fetch(`/api/search-users?phone=${encodeURIComponent(phoneNumber)}`);
-      
-      if (!response.ok) {
-        throw new Error('Search failed');
-      }
-      
-      const results = await response.json();
-      
-      // Mock data for demonstration - replace with actual API response
-      const mockResults: SearchResult[] = [
-        {
-          id: 'search-1',
-          name: 'Alice Smith',
-          phone: phoneNumber,
-          isOnline: true,
-          hasExistingChat: false,
-          unreadCount: 0
-        },
-        {
-          id: 'search-2', 
-          name: 'Bob Wilson',
-          phone: phoneNumber,
-          isOnline: false,
-          hasExistingChat: true,
-          lastMessage: 'Hey, how are you?',
-          lastMessageTime: '2 days',
-          unreadCount: 1
-        }
-      ];
-      
-      setSearchResults(mockResults);
-    } catch (error) {
-      console.error('Search error:', error);
+      const res = await fetch(`/api/search?phone=${encodeURIComponent(trimmed)}`);
+      if (!res.ok) throw new Error('Failed to fetch search results');
+
+      const data = await res.json();
+
+      // Validate and normalize the result (safe fallback handling)
+      const results: SearchResult[] = Array.isArray(data)
+        ? data.map((user: any) => ({
+            id: user.id,
+            name: user.name || user.phone,
+            phone: user.phone,
+            avatar: user.avatar || '',
+            isOnline: !!user.isOnline,
+            hasExistingChat: !!user.hasExistingChat,
+            lastMessage: user.lastMessage || '',
+            lastMessageTime: user.lastMessageTime || '',
+            unreadCount: user.unreadCount || 0,
+          }))
+        : [];
+
+      setSearchResults(results);
+    } catch (err) {
+      console.error('Search error:', err);
       setSearchResults([]);
     } finally {
       setIsSearching(false);
     }
   };
 
-  const clearSearch = () => {
-    setSearchResults([]);
-  };
+  const clearSearch = () => setSearchResults([]);
 
   return {
     searchResults,
     isSearching,
     searchByPhone,
-    clearSearch
+    clearSearch,
   };
 };
