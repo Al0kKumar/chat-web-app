@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import API from '@/api'; 
 
 interface SearchResult {
   id: string;
@@ -26,12 +27,12 @@ export const usePhoneSearch = () => {
     setIsSearching(true);
 
     try {
-      const res = await fetch(`/api/search?phone=${encodeURIComponent(trimmed)}`);
-      if (!res.ok) throw new Error('Failed to fetch search results');
+      const res = await API.get('/api/v1/search', {
+        params: { phone: trimmed },
+      });
 
-      const data = await res.json();
+      const data = res.data;
 
-      // Validate and normalize the result (safe fallback handling)
       const results: SearchResult[] = Array.isArray(data)
         ? data.map((user: any) => ({
             id: user.id,
