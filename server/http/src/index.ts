@@ -14,7 +14,7 @@ const app = express();
 const prisma = new PrismaClient();
 
 app.use(cors({
-  origin: 'http://localhost:8080', 
+  origin: ['http://localhost:8080', 'https://chat-web-app-sigma.vercel.app/'],
   credentials: true
 }));
 
