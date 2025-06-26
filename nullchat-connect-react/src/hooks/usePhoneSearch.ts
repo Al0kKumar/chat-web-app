@@ -26,9 +26,14 @@ export const usePhoneSearch = () => {
 
     setIsSearching(true);
 
+    const token = localStorage.getItem('token');
+
     try {
       const res = await API.get('/search', {
         params: { phone: trimmed },
+        headers: {
+         Authorization: `Bearer ${token}`,
+      },
       });
 
       const data = res.data;
