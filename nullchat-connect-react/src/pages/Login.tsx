@@ -1,17 +1,21 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, MessageSquare } from 'lucide-react';
+import API from '@/api'; // using your wrapper
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -20,15 +24,27 @@ const Login = () => {
     });
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Login logic will be implemented here
-    console.log('Login with:', formData);
+    setLoading(true);
+    try {
+      const res = await API.post('/auth/login', formData);
+      console.log('Login successful:', res.data);
+
+      // Save token / user data if needed
+      // localStorage.setItem("token", res.data.token);
+
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Login failed:', err.response?.data || err.message);
+      alert(err.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleLogin = () => {
-    // Google OAuth login logic
-    console.log('Google login');
+    window.location.href = `http://localhost:3000/auth/google`;
   };
 
   return (
@@ -79,9 +95,10 @@ const Login = () => {
               
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
               >
-                Sign In
+                {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
 

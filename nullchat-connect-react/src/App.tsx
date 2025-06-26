@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,7 @@ import OtpVerification from "./pages/OtpVerification";
 import PhoneCollection from "./pages/PhoneCollection";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import ChatPage from "./pages/Chatpage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +27,7 @@ const App = () => (
           <Route path="/verify-otp" element={<OtpVerification />} />
           <Route path="/phone-collection" element={<PhoneCollection />} />
           <Route path="/dashboard" element={<Dashboard />} />
+           <Route path="/chat/:conversationId" element={<ChatPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

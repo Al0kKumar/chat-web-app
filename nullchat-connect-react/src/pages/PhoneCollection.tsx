@@ -1,16 +1,39 @@
-
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageSquare, Phone } from 'lucide-react';
+import API from '@/api'; 
+
 
 const PhoneCollection = () => {
   const [phone, setPhone] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleContinue = () => {
-    // Phone number collection logic
-    console.log('Phone number collected:', phone);
+  const email = location.state?.email;
+
+  const handleContinue = async () => {
+    if (!email) {
+      alert('Missing email. Please restart the signup process.');
+      return;
+    }
+
+    try {
+      const payload = {
+        email,
+        phoneNumber: phone,
+      };
+
+      const res = await API.post('/auth/google/complete-profile', payload); // adjust URL later
+      console.log('Phone linked successfully:', res.data);
+
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Failed to link phone:', err.response?.data || err.message);
+      alert(err.response?.data?.message || 'Something went wrong');
+    }
   };
 
   return (

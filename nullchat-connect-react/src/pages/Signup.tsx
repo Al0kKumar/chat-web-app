@@ -1,4 +1,4 @@
-
+import API from '@/api';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, User, Lock, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
+
+
+
 
 const Signup = () => {
+     
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -22,14 +30,54 @@ const Signup = () => {
     });
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    try {
+    const payload = {
+      name: formData.username,
+      email: formData.email,
+      phoneNumber: formData.phone,
+      password: formData.password,
+    };
+
+    const res = await API.post('/signup', payload);
+    console.log('Signup success:', res.data);
+
+    navigate('/verify-otp') 
+  } catch (err: any) {
+    console.error('Signup failed:', err.response?.data || err.message);
+    alert(err.response?.data?.message || 'Signup failed');
+  }
     // Signup logic will be implemented here
     console.log('Signup with:', formData);
   };
 
+
+  const googleLogin = useGoogleLogin({
+  onSuccess: async (tokenResponse) => {
+    try {
+      const res = await API.post('/auth/google', {
+        token: tokenResponse.access_token,
+      });
+
+      // Send OTP (assumed to be triggered server-side already)
+      // Navigate to OTP screen
+      navigate('/verify-otp', {
+        state: { from: 'google', email: res.data.user.email },
+      });
+
+    } catch (err) {
+      console.error('Google login failed:', err.response?.data || err.message);
+      alert('Google login failed');
+    }
+  }
+});
+    
+
   const handleGoogleSignup = () => {
     // Google OAuth signup logic
+    googleLogin();
     console.log('Google signup');
   };
 
