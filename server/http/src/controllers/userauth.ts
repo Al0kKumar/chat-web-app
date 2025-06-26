@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { getotp, sendotp } from "../services/email";
 import auth from "../middlewares/authmiddleware";
+import axios from "axios"
 
 const prisma = new PrismaClient()
 
@@ -81,8 +82,110 @@ const Signup = async  (req: Request, res: Response) => {
 
 const verifyOTPSchema = z.object({
     email: z.string(),
-    OTP:z.string()
+    otp:z.string()
 })
+
+
+export const resendOtp = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) return res.status(400).json({ message: "Email is required" });
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const otp = getotp();
+
+  await prisma.user.update({
+    where: { email },
+    data: {
+      otp,
+      otpCreatedat: new Date(),
+    },
+  });
+
+  await sendotp(email, otp);
+
+  return res.json({ message: "OTP resent successfully" });
+};
+
+
+
+export const googleAuth = async (req: Request, res: Response) => {
+  const { token } = req.body;
+
+  if (!token) return res.status(400).json({ message: "Access token missing" });
+
+  try {
+    const googleRes = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const { email, name } = googleRes.data;
+
+    if (!email) return res.status(400).json({ message: "Invalid Google token" });
+
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+
+      const otp = getotp();
+    const creationtime = new Date();
+
+    const user = await prisma.user.create({
+        data:{
+            name,
+            email,
+            phoneNumber:"",
+            password: "",
+            otp: otp,
+            otpCreatedat: creationtime
+        }
+    })
+
+    sendotp(email,otp);
+
+
+      const jwtToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY as string, {
+        expiresIn: "7d"
+      });
+
+      return res.json({
+        status: "new",
+        user,
+        token: jwtToken,
+      });
+    }
+
+    // If user exists:
+    const jwtToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY as string, {
+      expiresIn: "7d"
+    });
+
+    if (user.phoneNumber) {
+      // Existing user with phone — fully registered
+      return res.json({
+        status: "existing",
+        user,
+        token: jwtToken,
+      });
+    } else {
+      // Exists, but incomplete profile (no phone)
+      return res.json({
+        status: "incomplete",
+        user,
+        token: jwtToken,
+      });
+    }
+
+  } catch (error) {
+    console.error("Google login error:", error);
+    return res.status(500).json({ message: "Google login failed" });
+  }
+};
+
+
 
 const verifyOTP = async (req: Request, res: Response) => {
     
@@ -92,7 +195,7 @@ const verifyOTP = async (req: Request, res: Response) => {
         return res.status(401).json({msg:"Incorrect input "})
     }
      
-    const { email, OTP } = req.body;
+    const { email, otp } = req.body;
 
     const user = await prisma.user.findUnique({
         where:{email:email}
@@ -110,7 +213,7 @@ const verifyOTP = async (req: Request, res: Response) => {
         return res.status(401).json({msg:"OTP expired"})
     }
 
-    if(user.otp !== OTP ){
+    if(user.otp !== otp ){
         return res.status(401).json({msg:"Incorrect OTP"})
     }
 
@@ -125,6 +228,35 @@ const verifyOTP = async (req: Request, res: Response) => {
     return res.status(200).json({token})
     
 }
+
+
+export const completeGoogleProfile = async (req: Request, res: Response) => {
+  const { email, phoneNumber } = req.body;
+
+  if (!email || !phoneNumber) {
+    return res.status(400).json({ message: "Email and phone number are required" });
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const phoneExists = await prisma.user.findFirst({
+    where: {
+      phoneNumber,
+      NOT: { email },
+    },
+  });
+
+  if (phoneExists) return res.status(400).json({ message: "Phone already in use" });
+
+  const updatedUser = await prisma.user.update({
+    where: { email },
+    data: { phoneNumber },
+  });
+
+  return res.json({ message: "Profile updated", user: updatedUser });
+};
 
 const loginSchema = z.object({
     email:z.string().min(4, "email must be at least 3 characters long"),

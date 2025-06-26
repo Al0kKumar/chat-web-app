@@ -13,7 +13,10 @@ import dotenv from 'dotenv';
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:8080', 
+  credentials: true
+}));
 
 
 app.use(express.json());
@@ -36,9 +39,6 @@ wss.on('listening', () => {
     console.log(`WebSocket server is running on port ${process.env.PORT}`);
 });
     
-
-
-
 
 wss.on('connection', async (ws, req) => {
 
@@ -82,6 +82,11 @@ wss.on('connection', async (ws, req) => {
 
         if(unreadMsgs.length > 0){
             ws.send(JSON.stringify({unreadMsgs}))
+
+            await prisma.messages.updateMany({
+                where:{receiverid: senderid,isRead: false},
+                data:{isRead: true}
+            })
         }
 
     } catch (error) {
