@@ -188,7 +188,7 @@ const ChatPage = () => {
 
         const history = res.data.map((msg: any) => ({
           ...msg,
-          isOwn: msg.senderid === user.id,
+          isOwn: Number(msg.senderid) === Number(user.id),
           time: new Date(msg.timestamp).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
@@ -211,7 +211,7 @@ const ChatPage = () => {
     if (data.unreadMsgs) {
       const formatted = data.unreadMsgs.map((m: any) => ({
         ...m,
-        isOwn: m.senderid === user.id,
+        isOwn: Number(m.senderid) === Number(user.id),
         time: new Date(m.timestamp).toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',
@@ -223,7 +223,7 @@ const ChatPage = () => {
         ...prev,
         {
           ...data,
-          isOwn: data.senderid === user.id,
+          isOwn: Number(data.senderid) === Number(user.id),
           time: new Date().toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
