@@ -14,8 +14,15 @@
 //   const [messages, setMessages] = useState<any[]>([]);
 //   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-//   const user = JSON.parse(localStorage.getItem('user') || '{}');
+//   const storedUser = localStorage.getItem('user');
+//   const user = storedUser ? JSON.parse(storedUser) : null;
 //   const token = localStorage.getItem('token') || '';
+
+//   if (!user || !user.id) {
+//     console.error("❌ Invalid user in localStorage:", storedUser);
+//   }
+
+//   console.log("🔐 User ID:", user?.id);
 
 //   // ✅ Fetch Message History
 //   useEffect(() => {
@@ -29,18 +36,25 @@
 //           }
 //         );
 
-//         const history = res.data.map((msg: any) => ({
-//           ...msg,
-//           isOwn: Number(msg.senderid) === Number(user.id),
-//           time: new Date(msg.timestamp).toLocaleTimeString([], {
-//             hour: '2-digit',
-//             minute: '2-digit',
-//           }),
-//         }));
+//         console.log("📦 Raw history from backend:", res.data);
+
+//         const history = res.data.map((msg: any) => {
+//           const isOwn = Number(msg.senderid) === Number(user.id);
+//           console.log("💬 MSG FROM:", msg.senderid, "| YOU:", user.id, "| isOwn:", isOwn);
+
+//           return {
+//             ...msg,
+//             isOwn,
+//             time: new Date(msg.timestamp).toLocaleTimeString([], {
+//               hour: '2-digit',
+//               minute: '2-digit',
+//             }),
+//           };
+//         });
 
 //         setMessages(history);
 //       } catch (err) {
-//         console.error('Failed to fetch history:', err);
+//         console.error('❌ Failed to fetch history:', err);
 //       }
 //     };
 
@@ -49,24 +63,35 @@
 
 //   // ✅ WebSocket Logic
 //   const { sendMessage } = useWebSocket(token, (data: any) => {
+//     console.log("📡 WS Message Received:", data);
+
 //     if (data.message === 'Welcome from WebSocket server') return;
 
 //     if (data.unreadMsgs) {
-//       const formatted = data.unreadMsgs.map((m: any) => ({
-//         ...m,
-//         isOwn: Number(m.senderid) === Number(user.id),
-//         time: new Date(m.timestamp).toLocaleTimeString([], {
-//           hour: '2-digit',
-//           minute: '2-digit',
-//         }),
-//       }));
+//       const formatted = data.unreadMsgs.map((m: any) => {
+//         const isOwn = Number(m.senderid) === Number(user.id);
+//         console.log("🟡 Unread From:", m.senderid, "| You:", user.id, "| isOwn:", isOwn);
+
+//         return {
+//           ...m,
+//           isOwn,
+//           time: new Date(m.timestamp).toLocaleTimeString([], {
+//             hour: '2-digit',
+//             minute: '2-digit',
+//           }),
+//         };
+//       });
+
 //       setMessages((prev) => [...prev, ...formatted]);
 //     } else {
+//       const isOwn = Number(data.senderid) === Number(user.id);
+//       console.log("🟢 Realtime From:", data.senderid, "| You:", user.id, "| isOwn:", isOwn);
+
 //       setMessages((prev) => [
 //         ...prev,
 //         {
 //           ...data,
-//           isOwn: Number(data.senderid) === Number(user.id),
+//           isOwn,
 //           time: new Date().toLocaleTimeString([], {
 //             hour: '2-digit',
 //             minute: '2-digit',
@@ -76,6 +101,7 @@
 //     }
 //   });
 
+//   // ✅ Send Message
 //   const handleSend = () => {
 //     if (!newMsg.trim()) return;
 
@@ -84,6 +110,8 @@
 //       receiverid: Number(conversationId),
 //       content: newMsg,
 //     };
+
+//     console.log("📤 Sending message:", message);
 
 //     sendMessage(message);
 
@@ -102,6 +130,7 @@
 //     setNewMsg('');
 //   };
 
+//   // ✅ Auto Scroll
 //   useEffect(() => {
 //     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
 //   }, [messages]);
@@ -125,9 +154,7 @@
 //             <div key={idx} className={`w-full flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}>
 //               <div
 //                 className={`max-w-sm p-3 rounded-xl ${
-//                   msg.isOwn
-//                     ? 'bg-purple-600 text-white'
-//                     : 'bg-white/10 text-white'
+//                   msg.isOwn ? 'bg-purple-600 text-white' : 'bg-white/10 text-white'
 //                 }`}
 //               >
 //                 <p>{msg.content}</p>
@@ -168,26 +195,30 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+
+type DecodedToken = {
+  id: number;
+  // optionally: username, email, etc.
+};
 
 const ChatPage = () => {
   const { conversationId } = useParams();
   const navigate = useNavigate();
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const [newMsg, setNewMsg] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const storedUser = localStorage.getItem('user');
-  const user = storedUser ? JSON.parse(storedUser) : null;
-  const token = localStorage.getItem('token') || '';
+  const token = localStorage.getItem('token');
+  const user: DecodedToken | null = token ? jwtDecode(token) : null;
 
-  if (!user || !user.id) {
-    console.error("❌ Invalid user in localStorage:", storedUser);
+  if (!user?.id) {
+    console.error('❌ No valid user ID found in token.');
+    return <div className="text-red-500 p-4">Error: User not logged in properly.</div>;
   }
 
-  console.log("🔐 User ID:", user?.id);
-
-  // ✅ Fetch Message History
+  // ✅ Fetch chat history
   useEffect(() => {
     const fetchHistory = async () => {
       try {
@@ -199,21 +230,16 @@ const ChatPage = () => {
           }
         );
 
-        console.log("📦 Raw history from backend:", res.data);
+        console.log('📦 Raw history from backend:', res.data);
 
-        const history = res.data.map((msg: any) => {
-          const isOwn = Number(msg.senderid) === Number(user.id);
-          console.log("💬 MSG FROM:", msg.senderid, "| YOU:", user.id, "| isOwn:", isOwn);
-
-          return {
-            ...msg,
-            isOwn,
-            time: new Date(msg.timestamp).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-          };
-        });
+        const history = res.data.map((msg: any) => ({
+          ...msg,
+          isOwn: Number(msg.senderid) === Number(user.id),
+          time: new Date(msg.timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        }));
 
         setMessages(history);
       } catch (err) {
@@ -222,39 +248,28 @@ const ChatPage = () => {
     };
 
     fetchHistory();
-  }, [conversationId]);
+  }, [conversationId, token, user.id]);
 
   // ✅ WebSocket Logic
-  const { sendMessage } = useWebSocket(token, (data: any) => {
-    console.log("📡 WS Message Received:", data);
-
+  const { sendMessage } = useWebSocket(token!, (data: any) => {
     if (data.message === 'Welcome from WebSocket server') return;
 
     if (data.unreadMsgs) {
-      const formatted = data.unreadMsgs.map((m: any) => {
-        const isOwn = Number(m.senderid) === Number(user.id);
-        console.log("🟡 Unread From:", m.senderid, "| You:", user.id, "| isOwn:", isOwn);
-
-        return {
-          ...m,
-          isOwn,
-          time: new Date(m.timestamp).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-        };
-      });
-
+      const formatted = data.unreadMsgs.map((m: any) => ({
+        ...m,
+        isOwn: Number(m.senderid) === Number(user.id),
+        time: new Date(m.timestamp).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      }));
       setMessages((prev) => [...prev, ...formatted]);
     } else {
-      const isOwn = Number(data.senderid) === Number(user.id);
-      console.log("🟢 Realtime From:", data.senderid, "| You:", user.id, "| isOwn:", isOwn);
-
       setMessages((prev) => [
         ...prev,
         {
           ...data,
-          isOwn,
+          isOwn: Number(data.senderid) === Number(user.id),
           time: new Date().toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
@@ -264,7 +279,6 @@ const ChatPage = () => {
     }
   });
 
-  // ✅ Send Message
   const handleSend = () => {
     if (!newMsg.trim()) return;
 
@@ -273,8 +287,6 @@ const ChatPage = () => {
       receiverid: Number(conversationId),
       content: newMsg,
     };
-
-    console.log("📤 Sending message:", message);
 
     sendMessage(message);
 
@@ -293,7 +305,6 @@ const ChatPage = () => {
     setNewMsg('');
   };
 
-  // ✅ Auto Scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
