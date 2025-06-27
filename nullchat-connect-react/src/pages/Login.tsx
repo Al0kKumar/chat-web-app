@@ -34,7 +34,7 @@ const Login = () => {
     try {
       localStorage.removeItem('token');
 
-      const res = await API.post('/auth/login', formData);
+      const res = await API.post('/login', formData);
       console.log('Login successful:', res.data);
 
       const { token } = res.data;
