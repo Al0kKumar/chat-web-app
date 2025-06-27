@@ -74,7 +74,14 @@ const ChatPage = () => {
   }, [token, user.id]);
 
   const handleSend = () => {
-    if (!newMsg.trim() || !wsRef.current) return;
+    if (!newMsg.trim()) return;
+
+   console.log("👉 handleSend fired", newMsg);
+
+   if (!wsRef.current || wsRef.current.readyState !== 1) {
+    console.warn("⚠️ WebSocket not connected", wsRef.current?.readyState);
+    return;
+  }
 
     const message = {
       senderid: user.id,
@@ -82,7 +89,13 @@ const ChatPage = () => {
       content: newMsg,
     };
 
-    wsRef.current.send(JSON.stringify(message));
+    console.log("📤 Sending message:", message);
+
+    try {
+      wsRef.current.send(JSON.stringify(message));
+    } catch (err) {
+      console.error("❌ Failed to send message", err);
+    }
 
     setMessages((prev) => [
       ...prev,
