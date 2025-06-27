@@ -4,6 +4,7 @@
 // import { Input } from '@/components/ui/input';
 // import { Button } from '@/components/ui/button';
 // import { useWebSocket } from '@/hooks/useWebSocket';
+// import axios from 'axios'; // ✅ NEW
 
 // const ChatPage = () => {
 //   const { conversationId } = useParams();
@@ -16,6 +17,37 @@
 //   const user = JSON.parse(localStorage.getItem('user') || '{}');
 //   const token = localStorage.getItem('token') || '';
 
+//   // ✅ FETCH MESSAGE HISTORY
+//   useEffect(() => {
+//     const fetchHistory = async () => {
+//       try {
+//         const res = await axios.get(
+//           `https://chat-app-e527.onrender.com/api/v1/chathistory/${conversationId}`, // adjust your actual endpoint
+//           {
+//             headers: { Authorization: `Bearer ${token}` },
+//             withCredentials: true,
+//           }
+//         );
+
+//         const history = res.data.map((msg: any) => ({
+//           ...msg,
+//           isOwn: msg.senderid === user.id,
+//           time: new Date(msg.timestamp).toLocaleTimeString([], {
+//             hour: '2-digit',
+//             minute: '2-digit',
+//           }),
+//         }));
+
+//         setMessages(history);
+//       } catch (err) {
+//         console.error('Failed to fetch history:', err);
+//       }
+//     };
+
+//     fetchHistory();
+//   }, [conversationId]);
+
+//   // ✅ SOCKET LOGIC
 //   const { sendMessage } = useWebSocket(token, (data: any) => {
 //     if (data.message === 'Welcome from WebSocket server') return;
 
@@ -23,7 +55,10 @@
 //       const formatted = data.unreadMsgs.map((m: any) => ({
 //         ...m,
 //         isOwn: m.senderid === user.id,
-//         time: 'Unread', // Should come from server ideally
+//         time: new Date(m.timestamp).toLocaleTimeString([], {
+//           hour: '2-digit',
+//           minute: '2-digit',
+//         }),
 //       }));
 //       setMessages((prev) => [...prev, ...formatted]);
 //     } else {
@@ -32,7 +67,10 @@
 //         {
 //           ...data,
 //           isOwn: data.senderid === user.id,
-//           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+//           time: new Date().toLocaleTimeString([], {
+//             hour: '2-digit',
+//             minute: '2-digit',
+//           }),
 //         },
 //       ]);
 //     }
@@ -47,7 +85,6 @@
 //       content: newMsg,
 //     };
 
-//     console.log('📤 Sending message:', message);
 //     sendMessage(message);
 
 //     setMessages((prev) => [
@@ -55,7 +92,10 @@
 //       {
 //         ...message,
 //         isOwn: true,
-//         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+//         time: new Date().toLocaleTimeString([], {
+//           hour: '2-digit',
+//           minute: '2-digit',
+//         }),
 //       },
 //     ]);
 
@@ -78,17 +118,21 @@
 //       </div>
 
 //       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-//         {messages.map((msg, idx) => (
-//           <div
-//             key={idx}
-//             className={`max-w-sm p-3 rounded-xl ${
-//               msg.isOwn ? 'ml-auto bg-purple-600 text-white' : 'bg-white/10 text-white'
-//             }`}
-//           >
-//             <p>{msg.content}</p>
-//             <span className="block text-xs mt-1 text-right opacity-60">{msg.time}</span>
-//           </div>
-//         ))}
+//         {messages.length > 0 ? (
+//           messages.map((msg, idx) => (
+//             <div
+//               key={idx}
+//               className={`max-w-sm p-3 rounded-xl ${
+//                 msg.isOwn ? 'ml-auto bg-purple-600 text-white' : 'bg-white/10 text-white'
+//               }`}
+//             >
+//               <p>{msg.content}</p>
+//               <span className="block text-xs mt-1 text-right opacity-60">{msg.time}</span>
+//             </div>
+//           ))
+//         ) : (
+//           <div className="text-purple-400 italic text-center mt-10">No messages yet.</div>
+//         )}
 //         <div ref={bottomRef} />
 //       </div>
 
@@ -117,7 +161,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import axios from 'axios'; // ✅ NEW
+import axios from 'axios';
 
 const ChatPage = () => {
   const { conversationId } = useParams();
@@ -130,12 +174,12 @@ const ChatPage = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const token = localStorage.getItem('token') || '';
 
-  // ✅ FETCH MESSAGE HISTORY
+  // ✅ Fetch Message History
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const res = await axios.get(
-          `https://chat-app-e527.onrender.com/api/v1/chathistory/${conversationId}`, // adjust your actual endpoint
+          `https://chat-app-e527.onrender.com/api/v1/chathistory/${conversationId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
@@ -160,7 +204,7 @@ const ChatPage = () => {
     fetchHistory();
   }, [conversationId]);
 
-  // ✅ SOCKET LOGIC
+  // ✅ WebSocket Logic
   const { sendMessage } = useWebSocket(token, (data: any) => {
     if (data.message === 'Welcome from WebSocket server') return;
 
@@ -221,6 +265,7 @@ const ChatPage = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <div className="flex items-center space-x-3">
           <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
@@ -230,17 +275,21 @@ const ChatPage = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.length > 0 ? (
           messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`max-w-sm p-3 rounded-xl ${
-                msg.isOwn ? 'ml-auto bg-purple-600 text-white' : 'bg-white/10 text-white'
-              }`}
-            >
-              <p>{msg.content}</p>
-              <span className="block text-xs mt-1 text-right opacity-60">{msg.time}</span>
+            <div key={idx} className={`w-full flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`max-w-sm p-3 rounded-xl ${
+                  msg.isOwn
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-white/10 text-white'
+                }`}
+              >
+                <p>{msg.content}</p>
+                <span className="block text-xs mt-1 text-right opacity-60">{msg.time}</span>
+              </div>
             </div>
           ))
         ) : (
@@ -249,6 +298,7 @@ const ChatPage = () => {
         <div ref={bottomRef} />
       </div>
 
+      {/* Input */}
       <div className="p-4 border-t border-white/10 flex gap-2">
         <Input
           placeholder="Type a message..."
