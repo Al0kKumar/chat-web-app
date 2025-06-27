@@ -114,7 +114,6 @@
   },
  "include": [
     "src/**/*",
-    "../models/**/*",
     "../prisma/**/*",
     "src/types/**/*.d.ts"
   ],
