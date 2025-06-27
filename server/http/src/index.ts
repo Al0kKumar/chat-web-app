@@ -64,6 +64,8 @@ wss.on('connection', async (ws, req) => {
 
     const senderid = verified.id as number;
 
+    if (!senderid) throw new Error("Missing ID in token");
+
     const existingSocket = clients.get(senderid);
 
     if (existingSocket) {
@@ -106,9 +108,12 @@ wss.on('connection', async (ws, req) => {
             try {
                 const parsedMessage = JSON.parse(data.toString());
     
-                const { senderid, receiverid, content } = parsedMessage;
+                const { receiverid, content } = parsedMessage;
     
-                if(!senderid || !receiverid || !content)  return; 
+                if (!receiverid || !content || typeof content !== "string") {
+                    console.warn("⚠️ Invalid message format:", parsedMessage);
+                    return;
+                }
                 
                 const receiverSocket = clients.get(receiverid);
                 if(receiverSocket){
