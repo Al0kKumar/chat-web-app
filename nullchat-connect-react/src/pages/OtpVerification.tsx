@@ -17,7 +17,11 @@ const OtpVerification = () => {
   const from = location.state?.from; // 'google' or undefined
 
   const handleVerifyOtp = async () => {
-    if (!email) return alert("Missing email, can't verify.");
+    if (!email) {
+      alert("Missing email, can't verify.");
+      navigate('/signup');
+      return;
+    }
 
     try {
       setLoading(true);

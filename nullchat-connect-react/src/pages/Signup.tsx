@@ -42,7 +42,7 @@ const Signup = () => {
     const res = await API.post('/signup', payload);
     console.log('Signup success:', res.data);
 
-    navigate('/verify-otp') 
+    navigate('/verify-otp', { state: { email: formData.email } }) 
   } catch (err: any) {
     console.error('Signup failed:', err.response?.data || err.message);
     alert(err.response?.data?.message || 'Signup failed');
