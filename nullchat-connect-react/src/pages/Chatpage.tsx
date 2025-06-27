@@ -16,73 +16,30 @@
 //   const user = JSON.parse(localStorage.getItem('user') || '{}');
 //   const token = localStorage.getItem('token') || '';
 
-//   const wsRef = useRef<WebSocket | null>(null);
+//   const { sendMessage } = useWebSocket(token, (data: any) => {
+//     if (data.message === 'Welcome from WebSocket server') return;
 
-//   useEffect(() => {
-//     if (!token || !user.id) return;
-
-//     let ws: WebSocket;
-//     let reconnectAttempts = 0;
-
-//     const connect = () => {
-
-//     ws = new WebSocket(`${import.meta.env.VITE_WS_URL}?token=${token}`);
-//     wsRef.current = ws;
-
-//     ws.onopen = () => {
-//       console.log('✅ WebSocket connected');
-//     };
-
-//     ws.onmessage = (event) => {
-//       const data = JSON.parse(event.data);
-
-//       if (data.message === 'Welcome from WebSocket server') return;
-
-//       if (data.unreadMsgs) {
-//         const formatted = data.unreadMsgs.map((m: any) => ({
-//           ...m,
-//           isOwn: m.senderid === user.id,
-//           time: 'Unread', // Placeholder, ideally from server
-//         }));
-//         setMessages((prev) => [...prev, ...formatted]);
-//       } else {
-//         setMessages((prev) => [
-//           ...prev,
-//           {
-//             ...data,
-//             isOwn: data.senderid === user.id,
-//             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-//           },
-//         ]);
-//       }
-//     };
-
-//     ws.onclose = () => {
-//       console.log('❌ WebSocket disconnected');
-//       if(reconnectAttempts < 5){
-//         setTimeout(connect, 1000* Math.pow(2,reconnectAttempts++));
-//       }
-//     };
-
-//   };
-
-    
-//   connect();
-
-//     return () => {
-//       ws.close();
-//     };
-//   }, [token, user.id]);
+//     if (data.unreadMsgs) {
+//       const formatted = data.unreadMsgs.map((m: any) => ({
+//         ...m,
+//         isOwn: m.senderid === user.id,
+//         time: 'Unread', // Should come from server ideally
+//       }));
+//       setMessages((prev) => [...prev, ...formatted]);
+//     } else {
+//       setMessages((prev) => [
+//         ...prev,
+//         {
+//           ...data,
+//           isOwn: data.senderid === user.id,
+//           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+//         },
+//       ]);
+//     }
+//   });
 
 //   const handleSend = () => {
 //     if (!newMsg.trim()) return;
-
-//    console.log("👉 handleSend fired", newMsg);
-
-//    if (!wsRef.current || wsRef.current.readyState !== 1) {
-//     console.warn("⚠️ WebSocket not connected", wsRef.current?.readyState);
-//     return;
-//   }
 
 //     const message = {
 //       senderid: user.id,
@@ -90,13 +47,8 @@
 //       content: newMsg,
 //     };
 
-//     console.log("📤 Sending message:", message);
-
-//     try {
-//       wsRef.current.send(JSON.stringify(message));
-//     } catch (err) {
-//       console.error("❌ Failed to send message", err);
-//     }
+//     console.log('📤 Sending message:', message);
+//     sendMessage(message);
 
 //     setMessages((prev) => [
 //       ...prev,
@@ -158,12 +110,14 @@
 
 // export default ChatPage;
 
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import axios from 'axios'; // ✅ NEW
 
 const ChatPage = () => {
   const { conversationId } = useParams();
@@ -176,6 +130,37 @@ const ChatPage = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const token = localStorage.getItem('token') || '';
 
+  // ✅ FETCH MESSAGE HISTORY
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await axios.get(
+          `https://chat-app-e527.onrender.com/api/v1/chathistory/${conversationId}`, // adjust your actual endpoint
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+
+        const history = res.data.map((msg: any) => ({
+          ...msg,
+          isOwn: msg.senderid === user.id,
+          time: new Date(msg.timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        }));
+
+        setMessages(history);
+      } catch (err) {
+        console.error('Failed to fetch history:', err);
+      }
+    };
+
+    fetchHistory();
+  }, [conversationId]);
+
+  // ✅ SOCKET LOGIC
   const { sendMessage } = useWebSocket(token, (data: any) => {
     if (data.message === 'Welcome from WebSocket server') return;
 
@@ -183,7 +168,10 @@ const ChatPage = () => {
       const formatted = data.unreadMsgs.map((m: any) => ({
         ...m,
         isOwn: m.senderid === user.id,
-        time: 'Unread', // Should come from server ideally
+        time: new Date(m.timestamp).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       }));
       setMessages((prev) => [...prev, ...formatted]);
     } else {
@@ -192,7 +180,10 @@ const ChatPage = () => {
         {
           ...data,
           isOwn: data.senderid === user.id,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          time: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
         },
       ]);
     }
@@ -207,7 +198,6 @@ const ChatPage = () => {
       content: newMsg,
     };
 
-    console.log('📤 Sending message:', message);
     sendMessage(message);
 
     setMessages((prev) => [
@@ -215,7 +205,10 @@ const ChatPage = () => {
       {
         ...message,
         isOwn: true,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       },
     ]);
 
@@ -238,17 +231,21 @@ const ChatPage = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`max-w-sm p-3 rounded-xl ${
-              msg.isOwn ? 'ml-auto bg-purple-600 text-white' : 'bg-white/10 text-white'
-            }`}
-          >
-            <p>{msg.content}</p>
-            <span className="block text-xs mt-1 text-right opacity-60">{msg.time}</span>
-          </div>
-        ))}
+        {messages.length > 0 ? (
+          messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`max-w-sm p-3 rounded-xl ${
+                msg.isOwn ? 'ml-auto bg-purple-600 text-white' : 'bg-white/10 text-white'
+              }`}
+            >
+              <p>{msg.content}</p>
+              <span className="block text-xs mt-1 text-right opacity-60">{msg.time}</span>
+            </div>
+          ))
+        ) : (
+          <div className="text-purple-400 italic text-center mt-10">No messages yet.</div>
+        )}
         <div ref={bottomRef} />
       </div>
 

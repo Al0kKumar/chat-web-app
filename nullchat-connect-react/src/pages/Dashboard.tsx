@@ -1,5 +1,3 @@
-
-
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import {
@@ -12,14 +10,38 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { usePhoneSearch } from '@/hooks/usePhoneSearch';
-
-// Placeholder for now
-const conversations: any[] = []; // Replace with real backend data
+import axios from 'axios';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const { searchResults, isSearching, searchByPhone, clearSearch } = usePhoneSearch();
+  const [conversations, setConversations] = useState<any[]>([]);
+  
+
+  
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.get(
+          'https://chat-app-e527.onrender.com/api/v1/getchats',
+          {
+            withCredentials: true, 
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        setConversations(response.data);
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+      }
+    };
+
+    fetchConversations();
+  }, []);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -82,7 +104,7 @@ const Dashboard = () => {
                   <div className="relative">
                     <Avatar className="h-12 w-12">
                       <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-                        {conversation.name
+                        {conversation.userName
                           ?.split(' ')
                           .map((n: string) => n[0])
                           .join('')
@@ -97,7 +119,7 @@ const Dashboard = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-white truncate">
-                        {conversation.name || conversation.phone}
+                        {conversation.userName || conversation.phoneNumber}
                       </h3>
                       {conversation.lastMessageTime && (
                         <span className="text-xs text-purple-300">
