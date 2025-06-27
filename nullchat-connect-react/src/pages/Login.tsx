@@ -27,14 +27,27 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if(loading)  return;
+
     setLoading(true);
     try {
+      localStorage.removeItem('token');
+
       const res = await API.post('/auth/login', formData);
       console.log('Login successful:', res.data);
 
-      localStorage.setItem("token", res.data.token);
+      const { token } = res.data;
 
-      navigate('/dashboard');
+      if(token){
+        localStorage.setItem("token", res.data.token);
+        navigate('/dashboard');
+      }
+      else{
+        alert('No token recievd.Something went wrong')
+      }
+
+      
     } catch (err: any) {
       console.error('Login failed:', err.response?.data || err.message);
       alert(err.response?.data?.message || 'Login failed. Please try again.');
@@ -47,14 +60,19 @@ const Login = () => {
    const googleLogin = useGoogleLogin({
      onSuccess: async (tokenResponse) => {
       try {
+        localStorage.removeItem('token');
+
         const res = await API.post('/auth/google', {
           token: tokenResponse.access_token,
         });
   
         const { user, token, status } = res.data;
+
+        if(token){
+          localStorage.setItem('token', token);
+        }
   
         if (status === "existing") {
-          localStorage.setItem("token", token);
           navigate('/dashboard');
         } else if (status === "incomplete") {
           // No phone number yet
@@ -70,7 +88,7 @@ const Login = () => {
   
       } catch (err) {
         console.error('Google login failed:', err.response?.data || err.message);
-        alert('Google login failed');
+        alert(err.response?.data?.message || 'Google login failed');
       }
     }
   });
