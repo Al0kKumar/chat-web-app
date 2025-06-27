@@ -3,8 +3,8 @@ import API from '@/api';
 
 interface SearchResult {
   id: string;
-  name: string;
-  phone: string;
+  userName: string;
+  phoneNumber: string;
   avatar?: string;
   isOnline: boolean;
   hasExistingChat: boolean;
@@ -41,8 +41,8 @@ export const usePhoneSearch = () => {
       const results: SearchResult[] = Array.isArray(data)
         ? data.map((user: any) => ({
             id: user.id,
-            name: user.name || user.phone,
-            phone: user.phone,
+            userName: user.name || user.phone,
+            phoneNumber: user.phone,
             avatar: user.avatar || '',
             isOnline: !!user.isOnline,
             hasExistingChat: !!user.hasExistingChat,
