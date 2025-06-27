@@ -10,7 +10,7 @@ const Chatsbetween = async (req: Request,res: Response) => {
   // const recipientid = parseInt(req.query.recipientId as string);
 
   const currentuserid = req.user?.id;
-  const recipientid = parseInt(req.query.recipientId as string);
+  const recipientid = parseInt(req.params.recipientid as string);
 
   console.log("Current User ID:", currentuserid);
   console.log("Recipient ID:", recipientid);

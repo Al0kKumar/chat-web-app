@@ -141,7 +141,7 @@ const getAllchats = async (req: Request, res: Response) => {
     });
 
     chatSummaries.push({
-      userid: partner?.id,
+      id: partner?.id,
       userName: partner?.name,
       phoneNumber: partner?.phoneNumber,
       lastMessage: msg.content,

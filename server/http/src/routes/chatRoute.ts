@@ -5,7 +5,7 @@ import { getAllchats } from "../controllers/searchUser";
 
 const router = Router();
 
-router.get('/chathistory', auth, Chatsbetween )
+router.get('/chathistory/:recipientid', auth, Chatsbetween )
 
 router.get('/getchats', auth, getAllchats)
 
