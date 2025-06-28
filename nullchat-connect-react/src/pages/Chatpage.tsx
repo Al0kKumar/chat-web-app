@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { formatMessageBubbleTime } from '@/utils/timeFormatter';
 
 type DecodedToken = {
   id: number;
@@ -142,7 +143,7 @@ const ChatPage = () => {
                 }`}
               >
                 <p>{msg.content}</p>
-                <span className="block text-xs mt-1 text-right opacity-60">{msg.time}</span>
+                <span className="block text-xs mt-1 text-right opacity-60">{formatMessageBubbleTime(msg.timestamp)}</span>
               </div>
             </div>
           ))
