@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { usePhoneSearch } from '@/hooks/usePhoneSearch';
 import axios from 'axios';
+import { formatMessageTimestamp } from '@/utils/timeFormatter';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -126,7 +127,7 @@ const Dashboard = () => {
                         </h3>
                         {conversation.lastMessageTime && (
                           <span className="text-xs text-purple-300">
-                            {conversation.lastMessageTime}
+                            {formatMessageTimestamp(conversation.lastMessageTime)}
                           </span>
                         )}
                       </div>
