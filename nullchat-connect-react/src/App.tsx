@@ -11,6 +11,7 @@ import PhoneCollection from "./pages/PhoneCollection";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import ChatPage from "./pages/Chatpage";
+import UserInfoPage from "./pages/UserInfoPage";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/phone-collection" element={<PhoneCollection />} />
           <Route path="/dashboard" element={<Dashboard />} />
            <Route path="/chat/:conversationId" element={<ChatPage />} />
+           <Route path="/user/:id" element={<UserInfoPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
