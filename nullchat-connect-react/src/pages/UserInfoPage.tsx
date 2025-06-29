@@ -38,7 +38,17 @@ const UserInfoPage = () => {
           {getInitials()}
         </div>
         <h2 className="mt-4 text-2xl font-semibold">{username || 'Unknown User'}</h2>
-        <p className="text-purple-300 mt-2">{phoneNumber || 'No Number'}</p>
+         {phoneNumber ? (
+          <p className="mt-2 text-lg text-purple-200 flex items-center justify-center space-x-2">
+            <span className="bg-white/10 text-purple-300 px-2 py-0.5 rounded-full text-sm font-medium tracking-wide">
+              +91
+            </span>
+            <span className="text-white tracking-wide font-mono">{phoneNumber}</span>
+          </p>
+        ) : (
+          <p className="text-purple-300 mt-2">No Number</p>
+        )}
+
       </div>
     </div>
   );
