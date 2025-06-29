@@ -48,10 +48,11 @@ const UserInfoPage = () => {
         ) : (
           <p className="text-purple-300 mt-2">No Number</p>
         )}
-
       </div>
     </div>
   );
 };
+
+// it works until 
 
 export default UserInfoPage;
