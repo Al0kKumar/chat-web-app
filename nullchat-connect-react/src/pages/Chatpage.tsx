@@ -103,7 +103,7 @@ const ChatPage = () => {
       {/* Header  */}
        <div className="flex items-center px-4 py-4 border-b border-white/10 bg-black/20 backdrop-blur"> 
         <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-          <ArrowLeft className="text-white hover:text-white" />
+          <ArrowLeft className="from-gray-900 via-purple-900 to-gray-900 text-white hover:text-white" />
         </Button>
           
       <div
