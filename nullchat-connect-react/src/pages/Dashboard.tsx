@@ -55,7 +55,14 @@ const Dashboard = () => {
     return () => clearTimeout(timeoutId);
   }, [searchQuery, searchByPhone, clearSearch]);
 
-  const handleClick = (id: string) => navigate(`/chat/${id}`);
+  const handleClick = (conversation: { userName?: string; phoneNumber?: string; id: string}) => 
+    navigate(`/chat/${conversation.id}`, {
+     state: {
+      username: conversation.userName,
+      id: conversation.id,
+      phoneNumber: conversation.phoneNumber
+    },
+  });
 
   const displayConversations = useMemo(() => {
     const result = searchQuery.trim() ? searchResults : conversations;
@@ -85,7 +92,7 @@ const Dashboard = () => {
               <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300 animate-spin" />
             )}
             <Input
-              placeholder="Search by phone or name..."
+              placeholder="Search by phone number..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300 focus:bg-white/15"
@@ -101,7 +108,7 @@ const Dashboard = () => {
               return (
                 <div
                   key={conversation.id}
-                  onClick={() => handleClick(conversation.id)}
+                  onClick={() => handleClick(conversation)}
                   className="p-4 border-b border-white/5 cursor-pointer transition-all duration-200 hover:bg-white/10"
                 >
                   <div className="flex items-center space-x-3">
