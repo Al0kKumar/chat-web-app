@@ -121,7 +121,8 @@ const ChatPage = () => {
           </span>
         </div> */}
 
-         <div
+        
+         {/* <div
         className="ml-4 flex items-center space-x-3 cursor-pointer hover:bg-white/5 px-2 py-1 rounded-md transition"
         onClick={() =>
           navigate(`/user/${conversationId}`, {
@@ -143,7 +144,34 @@ const ChatPage = () => {
           {username || phoneNumber || `Chat #${conversationId}`}
         </span>
       </div>
-      </div> 
+      </div>  */}
+
+      <div
+        className="flex-1 ml-4 flex items-center space-x-3 cursor-pointer hover:bg-white/5 px-2 py-2 rounded-md transition"
+        onClick={() =>
+          navigate(`/user/${conversationId}`, {
+            state: { username, phoneNumber },
+          })
+        }
+      >
+        {/* <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-white">
+          {avatarLetters}
+        </div> */}
+        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-bold">
+            {username
+              ? username
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)
+                  .toUpperCase()
+              : phoneNumber?.slice(-2)}
+          </div>
+        <span className="text-lg font-semibold text-white truncate">
+          {username || phoneNumber || `Chat #${conversationId}`}
+        </span>
+      </div>
+      </div>
 
       
     
