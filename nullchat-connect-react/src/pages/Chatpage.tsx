@@ -7,6 +7,10 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { formatMessageBubbleTime } from '@/utils/timeFormatter';
+import { useLocation } from 'react-router-dom';
+
+
+
 
 type DecodedToken = {
   id: number;
@@ -23,6 +27,9 @@ const ChatPage = () => {
 
   const token = localStorage.getItem('token');
   const user: DecodedToken | null = token ? jwtDecode(token) : null;
+
+  const location = useLocation();
+  const { username, phoneNumber } = location.state || {}
 
   if (!user?.id) {
     console.error('❌ No valid user ID found in token.');
@@ -128,9 +135,27 @@ const ChatPage = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="text-white" />
           </Button>
-          <h2 className="text-white font-semibold text-xl">Chat #{conversationId}</h2>
-        </div>
-      </div>
+          {/* <h2 className="text-white font-semibold text-xl">Chat #{conversationId}</h2> */}
+                <div className="flex items-center space-x-3">
+          <div className="relative">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center text-white font-semibold">
+              {username
+                ? username
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()
+                : phoneNumber?.slice(-2)}
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-white font-semibold text-base">
+              {username || phoneNumber || `Chat #${conversationId}`}
+            </span>
+              </div>
+            </div>
+            </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -152,7 +177,7 @@ const ChatPage = () => {
         )}
         <div ref={bottomRef} />
       </div>
-
+      </div>
       {/* Input */}
       <div className="p-4 border-t border-white/10 flex gap-2">
         <Input
