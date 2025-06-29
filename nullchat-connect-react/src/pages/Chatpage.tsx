@@ -101,11 +101,11 @@ const ChatPage = () => {
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
       {/* Header */}
-      <div className="flex items-center px-4 py-4 border-b border-white/10 bg-black/20 backdrop-blur">
+      <div className="flex items-center px-4 py-4 border-b border-white/10 bg-black/20 backdrop-blur"> 
         <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
           <ArrowLeft className="text-white" />
         </Button>
-        <div className="ml-4 flex items-center space-x-3">
+        {/* <div className="ml-4 flex items-center space-x-3">
           <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-bold">
             {username
               ? username
@@ -119,9 +119,34 @@ const ChatPage = () => {
           <span className="text-lg font-semibold">
             {username || phoneNumber || `Chat #${conversationId}`}
           </span>
-        </div>
-      </div>
+        </div> */}
 
+         <div
+        className="ml-4 flex items-center space-x-3 cursor-pointer hover:bg-white/5 px-2 py-1 rounded-md transition"
+        onClick={() =>
+          navigate(`/user/${conversationId}`, {
+            state: { username, phoneNumber },
+          })
+        }
+      >
+        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-white">
+          {username
+            ? username
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase()
+            : phoneNumber?.slice(-2)}
+        </div>
+        <span className="text-lg font-semibold text-white">
+          {username || phoneNumber || `Chat #${conversationId}`}
+        </span>
+      </div>
+      </div> 
+
+      
+    
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.length > 0 ? (
