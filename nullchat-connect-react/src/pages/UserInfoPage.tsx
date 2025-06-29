@@ -7,6 +7,10 @@ const UserInfoPage = () => {
   const { state } = useLocation();
   const { username, phoneNumber } = state || {};
 
+const location = useLocation();
+const isMyProfile = location.pathname === '/me'; // or any logic to check
+
+
   const getInitials = () => {
     if (username) {
       return username

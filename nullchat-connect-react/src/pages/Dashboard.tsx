@@ -12,6 +12,13 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { usePhoneSearch } from '@/hooks/usePhoneSearch';
 import axios from 'axios';
 import { formatMessageTimestamp } from '@/utils/timeFormatter';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'; // shadcn-style
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -82,7 +89,27 @@ const Dashboard = () => {
               <h1 className="text-2xl font-bold text-white">Nullchat</h1>
             </div>
             <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-              <MoreVertical className="h-5 w-5" />
+              {/* <MoreVertical className="h-5 w-5" /> */}
+              <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-slate-800 border-white/10 text-white">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/me')}>
+                  👤 My Info
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer"
+                  onClick={() => {
+                    localStorage.clear(); // or just remove token
+                    navigate('/login');
+                  }}
+                >
+                  🚪 Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             </Button>
           </div>
 
