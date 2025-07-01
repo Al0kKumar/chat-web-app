@@ -19,12 +19,56 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'; // shadcn-style
 
+interface CurrentUser {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  profilePic?: string; 
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const { searchResults, isSearching, searchByPhone, clearSearch } = usePhoneSearch();
   const [conversations, setConversations] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+
+
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // If no token, user is not logged in, redirect to login
+        navigate('/login');
+        return;
+      }
+
+      try {
+        // Assuming your backend has an endpoint like /api/users/me
+        const response = await axios.get<CurrentUser>(
+          'https://chat-app-e527.onrender.com/api/v1/userDetails', // <--- Your new endpoint
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setCurrentUser(response.data);
+        console.log('👤 Fetched current user info:', response.data);
+      } catch (error) {
+        console.error('❌ Error fetching current user info:', error);
+        // Handle token expiry or other auth errors
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          localStorage.clear();
+          navigate('/login');
+        }
+      } 
+    };
+
+    fetchCurrentUser();
+  }, [navigate]);
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -97,7 +141,13 @@ const Dashboard = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-slate-800 border-white/10 text-white">
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/me')}>
+                <DropdownMenuItem className="cursor-pointer" 
+                onClick={() =>  navigate(`/user/me`, {
+                  state: {
+                          username: currentUser.name, // Use currentUser.name
+                          phoneNumber: currentUser.phoneNumber, // Use currentUser.phoneNumber
+                        },
+                })}>
                   👤 My Info
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer"
