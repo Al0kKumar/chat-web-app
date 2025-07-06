@@ -274,7 +274,8 @@ const Signup = () => {
 
         const res = await API.post('/auth/google', {
           token: tokenResponse.access_token,
-        });
+        },
+        {withCredentials: true});
 
         const { user, token, status } = res.data;
 
