@@ -13,11 +13,22 @@ import dotenv from 'dotenv';
 const app = express();
 const prisma = new PrismaClient();
 
+const allowedOrigins = ['http://localhost:8080', 'https://chat-web-app-sigma.vercel.app'];
+
 app.use(cors({
-  origin: ['http://localhost:8080', 'https://chat-web-app-sigma.vercel.app'],
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true,
 }));
 
+app.options('*', cors());
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  next();
+});
 
 app.use(express.json());
 
