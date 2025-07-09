@@ -169,9 +169,9 @@ wss.on('connection', async (ws, req) => {
     }, 30000);
 });
 
+const PORT = process.env.PORT || 3000
 
-
-server.listen(process.env.PORT, () => {
-    console.log(`server is running on port ${process.env.PORT}`);
+server.listen(PORT, () => {
+    console.log(`server is running on port ${PORT}`);
      
 })
