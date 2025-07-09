@@ -94,7 +94,7 @@ const UserInfoPage = () => {
         // Make sure your backend's /api/v1/users/me endpoint is implemented
         // to return the authenticated user's ID.
         const response = await axios.get<{ id: number; }>(
-          'https://chat-app-e527.onrender.com/api/v1/userDetails',
+          'https://chat-web-app-6330.onrender.com/api/v1/userDetails',
           {
             headers: {
               Authorization: `Bearer ${token}`,

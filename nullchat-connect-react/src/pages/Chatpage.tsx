@@ -35,7 +35,7 @@ const ChatPage = () => {
     const fetchHistory = async () => {
       try {
         const res = await axios.get(
-          `https://chat-app-e527.onrender.com/api/v1/chathistory/${conversationId}`,
+          `https://chat-web-app-6330.onrender.com/api/v1/chathistory/${conversationId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,

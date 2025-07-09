@@ -48,7 +48,7 @@ const Dashboard = () => {
       try {
         // Assuming your backend has an endpoint like /api/users/me
         const response = await axios.get<CurrentUser>(
-          'https://chat-app-e527.onrender.com/api/v1/userDetails', // <--- Your new endpoint
+          'https://chat-web-app-6330.onrender.com/api/v1/userDetails', // <--- Your new endpoint
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -75,7 +75,7 @@ const Dashboard = () => {
       const token = localStorage.getItem('token');
       try {
         const response = await axios.get(
-          'https://chat-app-e527.onrender.com/api/v1/getchats',
+          'https://chat-web-app-6330.onrender.com/api/v1/getchats',
           {
             withCredentials: true,
             headers: {
