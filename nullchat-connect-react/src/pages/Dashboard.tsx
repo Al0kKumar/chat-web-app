@@ -181,7 +181,7 @@ const Dashboard = () => {
         <div className="flex-1 overflow-y-auto">
           {displayConversations.length > 0 ? (
             displayConversations.map((conversation: any) => {
-              console.log('🧱 Rendering conversation item:', conversation);
+       //       console.log('🧱 Rendering conversation item:', conversation);
               return (
                 <div
                   key={conversation.id}
