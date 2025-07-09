@@ -11,7 +11,7 @@ export const useWebSocket = (
   useEffect(() => {
     if (!token) return;
 
-    const socket = new WebSocket(`wss://chat-app-e527.onrender.com?token=${token}`);
+    const socket = new WebSocket(`wss://chat-web-app-6330.onrender.com?token=${token}`);
 
     socket.onopen = () => {
       console.log('🔌 WebSocket connected');
