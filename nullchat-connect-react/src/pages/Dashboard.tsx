@@ -56,7 +56,7 @@ const Dashboard = () => {
           }
         );
         setCurrentUser(response.data);
-        console.log('👤 Fetched current user info:', response.data);
+      //  console.log('👤 Fetched current user info:', response.data);
       } catch (error) {
         console.error('❌ Error fetching current user info:', error);
         // Handle token expiry or other auth errors
@@ -83,7 +83,7 @@ const Dashboard = () => {
             },
           }
         );
-        console.log('📡 Fetched conversations:', response.data);
+      //  console.log('📡 Fetched conversations:', response.data);
         setConversations(response.data);
       } catch (error) {
         console.error('❌ Error fetching conversations:', error);
@@ -117,7 +117,7 @@ const Dashboard = () => {
 
   const displayConversations = useMemo(() => {
     const result = searchQuery.trim() ? searchResults : conversations;
-    console.log('📡 Conversations to render:', result);
+  //  console.log('📡 Conversations to render:', result);
     return result;
   }, [searchQuery, searchResults, conversations]);
 
