@@ -13,22 +13,28 @@ import dotenv from 'dotenv';
 const app = express();
 const prisma = new PrismaClient();
 
-const allowedOrigins = ['http://localhost:8080', 'https://chat-web-app-sigma.vercel.app'];
+const allowedOrigins = [
+  'http://localhost:8080',
+  'https://chat-web-app-sigma.vercel.app',
+  // Add any other origins that need to access your backend
+];
 
+// Configure CORS middleware
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true, // Allow cookies to be sent
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Explicitly allow these methods
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"], // Explicitly allow these headers
 }));
 
-app.options('*', cors());
-
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  next();
-});
 
 app.use(express.json());
 
