@@ -146,7 +146,6 @@
 // export default UserInfoPage;
 
 
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Loader2, Trash2, Upload } from 'lucide-react';
@@ -157,15 +156,15 @@ import axios from 'axios';
 const UserInfoPage = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { username: stateUsername, phoneNumber: statePhone, id: displayedUserIdFromState } = state || {};
+  const { name: stateName, phoneNumber: statePhone, id: displayedUserIdFromState, profilePic: stateProfilePic } = state || {};
 
   const [authenticatedUserId, setAuthenticatedUserId] = useState<number | null>(null);
   const [isLoadingAuthId, setIsLoadingAuthId] = useState(true);
   const [newProfilePic, setNewProfilePic] = useState<File | null>(null);
   const [loadingUpload, setLoadingUpload] = useState(false);
-  const [currentProfilePic, setCurrentProfilePic] = useState<string | null>(null);
+  const [currentProfilePic, setCurrentProfilePic] = useState<string | null>(stateProfilePic || null);
 
-  const [username, setUsername] = useState(stateUsername || '');
+  const [username, setUsername] = useState(stateName || '');
   const [phoneNumber, setPhoneNumber] = useState(statePhone || '');
   const [displayedUserId, setDisplayedUserId] = useState<number | null>(displayedUserIdFromState || null);
 
@@ -180,35 +179,35 @@ const UserInfoPage = () => {
 
       try {
         const response = await axios.get('https://chat-web-app-6330.onrender.com/api/v1/userDetails', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        setAuthenticatedUserId(response.data.id);
-        if (!displayedUserId) {
-          setDisplayedUserId(response.data.id); // fallback
-        }
+        const authId = response.data.id;
+        setAuthenticatedUserId(authId);
+        setIsLoadingAuthId(false);
 
-        // If viewing own profile, use full data from backend
-        if (!displayedUserIdFromState || response.data.id === displayedUserIdFromState) {
-          setUsername(response.data.username);
+        // CASE: own profile
+        if (!displayedUserIdFromState || authId === displayedUserIdFromState) {
+          setDisplayedUserId(authId);
+          setUsername(response.data.name);
           setPhoneNumber(response.data.phoneNumber);
           setCurrentProfilePic(response.data.profilePic);
         } else {
-          setCurrentProfilePic(state?.profilePic || null);
+          // CASE: viewing someone else's profile
+          setDisplayedUserId(displayedUserIdFromState);
+          setUsername(stateName || '');
+          setPhoneNumber(statePhone || '');
+          setCurrentProfilePic(stateProfilePic || null);
         }
       } catch (err) {
         console.error('❌ Auth fetch failed:', err);
         localStorage.clear();
         navigate('/login');
-      } finally {
-        setIsLoadingAuthId(false);
       }
     };
 
     fetchAuthUserId();
-  }, [navigate, displayedUserId, displayedUserIdFromState, state]);
+  }, [navigate, displayedUserIdFromState, stateName, statePhone, stateProfilePic]);
 
   const isMyProfile = !isLoadingAuthId && authenticatedUserId === displayedUserId;
 
@@ -338,7 +337,10 @@ const UserInfoPage = () => {
           )}
         </div>
 
-        <h2 className="mt-4 text-2xl font-semibold">{username || 'Unknown User'}</h2>
+        <h2 className="mt-4 text-2xl font-semibold">
+          {username?.trim() ? username : 'Unknown User'}
+        </h2>
+
         {phoneNumber ? (
           <p className="mt-2 text-lg text-purple-200 flex items-center justify-center space-x-2">
             <span className="bg-white/10 text-purple-300 px-2 py-0.5 rounded-full text-sm font-medium tracking-wide">+91</span>
