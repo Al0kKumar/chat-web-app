@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import ChatPage from "./pages/Chatpage";
 import UserInfoPage from "./pages/UserInfoPage";
+import ProfileUpload from "./pages/ProfileUpload";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/verify-otp" element={<OtpVerification />} />
           <Route path="/phone-collection" element={<PhoneCollection />} />
+          <Route path="/profile-upload" element={<ProfileUpload />} />
           <Route path="/dashboard" element={<Dashboard />} />
            <Route path="/chat/:conversationId" element={<ChatPage />} />
            <Route path="/user/:id" element={<UserInfoPage />} />

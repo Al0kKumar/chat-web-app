@@ -32,11 +32,24 @@ const OtpVerification = () => {
 
       console.log('OTP Verified:', res.data);
 
+      let token = res.data.token;
+
+      if(token){
+        localStorage.setItem('token',token);
+      }
+
+      token = res.data;
+
+      if(token){
+        localStorage.setItem('token',token);
+      }
+
       // Decide where to go next
       if (from === 'google') {
         navigate('/phone-collection');
       } else {
-        navigate('/dashboard');
+        navigate('/profile-upload', { state: { email: email } });
+      //  navigate('/dashboard');
       }
     } catch (err: any) {
       console.error('OTP verification failed:', err.response?.data || err.message);

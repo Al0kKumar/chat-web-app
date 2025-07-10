@@ -29,7 +29,8 @@ const PhoneCollection = () => {
       const res = await API.post('/auth/google/complete-profile', payload); // adjust URL later
       console.log('Phone linked successfully:', res.data);
 
-      navigate('/dashboard');
+    //  navigate('/dashboard');
+    navigate('/profile-upload', { state: { email: email } });
     } catch (err: any) {
       console.error('Failed to link phone:', err.response?.data || err.message);
       alert(err.response?.data?.message || 'Something went wrong');
