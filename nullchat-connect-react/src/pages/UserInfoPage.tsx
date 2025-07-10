@@ -606,45 +606,41 @@ const UserInfoPage = () => {
       </div>
 
       <div className="max-w-md mx-auto bg-white/5 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-md text-center">
-        <div className="w-24 h-24 mx-auto mb-4">
+        <div className="w-24 h-24 mx-auto mb-2 relative">
           <Avatar className="w-full h-full">
-            {currentProfilePic ? (
-              <AvatarImage
-                src={currentProfilePic}
-                alt={`${username || 'User'}'s profile`}
-                className="object-cover"
-              />
-            ) : (
-              <AvatarFallback className="w-full h-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-3xl font-bold">
-                {getInitials()}
-              </AvatarFallback>
-            )}
-          </Avatar>
-        </div>
+             {currentProfilePic ? (
+               <AvatarImage src={currentProfilePic} alt={`${username || 'User'}'s profile`} className="object-cover" />
+             ) : (
+               <AvatarFallback className="w-full h-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-3xl font-bold">
+                 {getInitials()}
+               </AvatarFallback>
+             )}
+           </Avatar>
+         </div>
 
-        {isMyProfile && (
-          <div className="flex justify-center space-x-4 mb-4">
-            <label className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg cursor-pointer shadow">
-              {loadingUpload ? <Loader2 className="animate-spin h-4 w-4" /> : <Edit className="h-4 w-4" />}
-              <span>Edit</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-            <Button
-              variant="destructive"
-              className="px-4 py-2"
-              onClick={handleRemoveProfilePic}
-              disabled={loadingUpload}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Remove
-            </Button>
-          </div>
-        )}
+         {isMyProfile && (
+           <div className="flex justify-center gap-3 mt-3">
+             <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2 h-10 w-10 flex items-center justify-center shadow-md cursor-pointer">
+               {currentProfilePic ? <Edit className="h-5 w-5" /> : <Upload className="h-5 w-5" />}
+               <input
+                 type="file"
+                 accept="image/*"
+                 onChange={handleImageChange}
+                 className="hidden"
+               />
+             </label>
+             {currentProfilePic && (
+               <Button
+                 variant="ghost"
+                 size="icon"
+                 className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 h-10 w-10"
+                 onClick={handleRemoveProfilePic}
+               >
+                 <Trash2 className="h-5 w-5" />
+               </Button>
+             )}
+           </div>
+         )}
 
         <h2 className="mt-4 text-2xl font-semibold">
           {username?.trim() ? username : 'Unknown User'}
