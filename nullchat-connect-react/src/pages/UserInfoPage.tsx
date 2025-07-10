@@ -8,21 +8,21 @@
 // const UserInfoPage = () => {
 //   const navigate = useNavigate();
 //   const { state } = useLocation();
-//   const { name: stateName, phoneNumber: statePhone, id: displayedUserIdFromState, profilePic: stateProfilePic } = state || {};
+//   const { username: stateUsername, phoneNumber: statePhone, id: displayedUserIdFromState } = state || {};
 
 //   const [authenticatedUserId, setAuthenticatedUserId] = useState<number | null>(null);
 //   const [isLoadingAuthId, setIsLoadingAuthId] = useState(true);
 //   const [newProfilePic, setNewProfilePic] = useState<File | null>(null);
 //   const [loadingUpload, setLoadingUpload] = useState(false);
-//   const [currentProfilePic, setCurrentProfilePic] = useState<string | null>(stateProfilePic || null);
+//   const [currentProfilePic, setCurrentProfilePic] = useState<string | null>(null);
 
-//   const [username, setUsername] = useState(stateName || '');
+//   const [username, setUsername] = useState(stateUsername || '');
 //   const [phoneNumber, setPhoneNumber] = useState(statePhone || '');
 //   const [displayedUserId, setDisplayedUserId] = useState<number | null>(displayedUserIdFromState || null);
 
-//   // STEP 1: Fetch Authenticated User ID
+//   // Fetch authenticated + target user details
 //   useEffect(() => {
-//     const fetchAuthUserId = async () => {
+//     const fetchUserData = async () => {
 //       const token = localStorage.getItem('token');
 //       if (!token) {
 //         navigate('/login');
@@ -30,36 +30,41 @@
 //       }
 
 //       try {
-//         const response = await axios.get('https://chat-web-app-6330.onrender.com/api/v1/userDetails', {
+//         const authRes = await axios.get('https://chat-web-app-6330.onrender.com/api/v1/userDetails', {
 //           headers: { Authorization: `Bearer ${token}` },
 //         });
 
-//         const authId = response.data.id;
+//         const authId = authRes.data.id;
 //         setAuthenticatedUserId(authId);
 //         setIsLoadingAuthId(false);
 
-//         // CASE: own profile
+//         // Own profile
 //         if (!displayedUserIdFromState || authId === displayedUserIdFromState) {
 //           setDisplayedUserId(authId);
-//           setUsername(response.data.name);
-//           setPhoneNumber(response.data.phoneNumber);
-//           setCurrentProfilePic(response.data.profilePic);
+//           setUsername(authRes.data.name);
+//           setPhoneNumber(authRes.data.phoneNumber);
+//           setCurrentProfilePic(authRes.data.profilePic);
 //         } else {
-//           // CASE: viewing someone else's profile
-//           setDisplayedUserId(displayedUserIdFromState);
-//           setUsername(stateName || '');
-//           setPhoneNumber(statePhone || '');
-//           setCurrentProfilePic(stateProfilePic || null);
+//           // Other user profile
+//           const otherRes = await axios.get(`https://chat-web-app-6330.onrender.com/api/v1/recipentdetails/${displayedUserIdFromState}`, {
+//             headers: { Authorization: `Bearer ${token}` },
+//           });
+
+//           const other = otherRes.data;
+//           setDisplayedUserId(other.id);
+//           setUsername(other.name);
+//           setPhoneNumber(other.phoneNumber);
+//           setCurrentProfilePic(other.profilePic || null);
 //         }
 //       } catch (err) {
-//         console.error('❌ Auth fetch failed:', err);
+//         console.error('❌ Fetch failed:', err);
 //         localStorage.clear();
 //         navigate('/login');
 //       }
 //     };
 
-//     fetchAuthUserId();
-//   }, [navigate, displayedUserIdFromState, stateName, statePhone, stateProfilePic]);
+//     fetchUserData();
+//   }, [navigate, displayedUserIdFromState]);
 
 //   const isMyProfile = !isLoadingAuthId && authenticatedUserId === displayedUserId;
 
@@ -209,9 +214,6 @@
 // export default UserInfoPage;
 
 
-
-
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Loader2, Trash2, Upload } from 'lucide-react';
@@ -234,7 +236,6 @@ const UserInfoPage = () => {
   const [phoneNumber, setPhoneNumber] = useState(statePhone || '');
   const [displayedUserId, setDisplayedUserId] = useState<number | null>(displayedUserIdFromState || null);
 
-  // Fetch authenticated + target user details
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('token');
@@ -252,14 +253,12 @@ const UserInfoPage = () => {
         setAuthenticatedUserId(authId);
         setIsLoadingAuthId(false);
 
-        // Own profile
         if (!displayedUserIdFromState || authId === displayedUserIdFromState) {
           setDisplayedUserId(authId);
           setUsername(authRes.data.name);
           setPhoneNumber(authRes.data.phoneNumber);
           setCurrentProfilePic(authRes.data.profilePic);
         } else {
-          // Other user profile
           const otherRes = await axios.get(`https://chat-web-app-6330.onrender.com/api/v1/recipentdetails/${displayedUserIdFromState}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -360,7 +359,7 @@ const UserInfoPage = () => {
       </div>
 
       <div className="max-w-md mx-auto bg-white/5 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-md text-center">
-        <div className="relative w-24 h-24 mx-auto mb-4">
+        <div className="w-24 h-24 mx-auto mb-2 relative">
           <Avatar className="w-full h-full">
             {currentProfilePic ? (
               <AvatarImage src={currentProfilePic} alt={`${username || 'User'}'s profile`} className="object-cover" />
@@ -370,43 +369,31 @@ const UserInfoPage = () => {
               </AvatarFallback>
             )}
           </Avatar>
-
-          {isMyProfile && (
-            <>
-              {!currentProfilePic ? (
-                <label className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 h-8 w-8 flex items-center justify-center shadow-md cursor-pointer">
-                  <Upload className="h-4 w-4" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
-              ) : (
-                <div className="absolute bottom-0 right-0 flex gap-1">
-                  <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 h-8 w-8 flex items-center justify-center shadow-md cursor-pointer">
-                    <Edit className="h-4 w-4" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </label>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="bg-red-600 hover:bg-red-700 text-white rounded-full p-1 h-8 w-8"
-                    onClick={handleRemoveProfilePic}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
         </div>
+
+        {isMyProfile && (
+          <div className="flex justify-center gap-3 mt-3">
+            <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2 h-10 w-10 flex items-center justify-center shadow-md cursor-pointer">
+              {currentProfilePic ? <Edit className="h-5 w-5" /> : <Upload className="h-5 w-5" />}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </label>
+            {currentProfilePic && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 h-10 w-10"
+                onClick={handleRemoveProfilePic}
+              >
+                <Trash2 className="h-5 w-5" />
+              </Button>
+            )}
+          </div>
+        )}
 
         <h2 className="mt-4 text-2xl font-semibold">
           {username?.trim() ? username : 'Unknown User'}
