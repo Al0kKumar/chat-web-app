@@ -20,7 +20,6 @@
 //   const [phoneNumber, setPhoneNumber] = useState(statePhone || '');
 //   const [displayedUserId, setDisplayedUserId] = useState<number | null>(displayedUserIdFromState || null);
 
-//   // Fetch authenticated + target user details
 //   useEffect(() => {
 //     const fetchUserData = async () => {
 //       const token = localStorage.getItem('token');
@@ -38,14 +37,12 @@
 //         setAuthenticatedUserId(authId);
 //         setIsLoadingAuthId(false);
 
-//         // Own profile
 //         if (!displayedUserIdFromState || authId === displayedUserIdFromState) {
 //           setDisplayedUserId(authId);
 //           setUsername(authRes.data.name);
 //           setPhoneNumber(authRes.data.phoneNumber);
 //           setCurrentProfilePic(authRes.data.profilePic);
 //         } else {
-//           // Other user profile
 //           const otherRes = await axios.get(`https://chat-web-app-6330.onrender.com/api/v1/recipentdetails/${displayedUserIdFromState}`, {
 //             headers: { Authorization: `Bearer ${token}` },
 //           });
@@ -146,7 +143,7 @@
 //       </div>
 
 //       <div className="max-w-md mx-auto bg-white/5 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-md text-center">
-//         <div className="relative w-24 h-24 mx-auto mb-4">
+//         <div className="w-24 h-24 mx-auto mb-2 relative">
 //           <Avatar className="w-full h-full">
 //             {currentProfilePic ? (
 //               <AvatarImage src={currentProfilePic} alt={`${username || 'User'}'s profile`} className="object-cover" />
@@ -156,43 +153,31 @@
 //               </AvatarFallback>
 //             )}
 //           </Avatar>
-
-//           {isMyProfile && (
-//             <>
-//               {!currentProfilePic ? (
-//                 <label className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 h-8 w-8 flex items-center justify-center shadow-md cursor-pointer">
-//                   <Upload className="h-4 w-4" />
-//                   <input
-//                     type="file"
-//                     accept="image/*"
-//                     onChange={handleImageChange}
-//                     className="hidden"
-//                   />
-//                 </label>
-//               ) : (
-//                 <div className="absolute bottom-0 right-0 flex gap-1">
-//                   <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 h-8 w-8 flex items-center justify-center shadow-md cursor-pointer">
-//                     <Edit className="h-4 w-4" />
-//                     <input
-//                       type="file"
-//                       accept="image/*"
-//                       onChange={handleImageChange}
-//                       className="hidden"
-//                     />
-//                   </label>
-//                   <Button
-//                     variant="ghost"
-//                     size="icon"
-//                     className="bg-red-600 hover:bg-red-700 text-white rounded-full p-1 h-8 w-8"
-//                     onClick={handleRemoveProfilePic}
-//                   >
-//                     <Trash2 className="h-4 w-4" />
-//                   </Button>
-//                 </div>
-//               )}
-//             </>
-//           )}
 //         </div>
+
+//         {isMyProfile && (
+//           <div className="flex justify-center gap-3 mt-3">
+//             <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2 h-10 w-10 flex items-center justify-center shadow-md cursor-pointer">
+//               {currentProfilePic ? <Edit className="h-5 w-5" /> : <Upload className="h-5 w-5" />}
+//               <input
+//                 type="file"
+//                 accept="image/*"
+//                 onChange={handleImageChange}
+//                 className="hidden"
+//               />
+//             </label>
+//             {currentProfilePic && (
+//               <Button
+//                 variant="ghost"
+//                 size="icon"
+//                 className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 h-10 w-10"
+//                 onClick={handleRemoveProfilePic}
+//               >
+//                 <Trash2 className="h-5 w-5" />
+//               </Button>
+//             )}
+//           </div>
+//         )}
 
 //         <h2 className="mt-4 text-2xl font-semibold">
 //           {username?.trim() ? username : 'Unknown User'}
@@ -214,15 +199,19 @@
 // export default UserInfoPage;
 
 
+
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Loader2, Trash2, Upload } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast'; // ✅ ShadCN toast
 import axios from 'axios';
 
 const UserInfoPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast(); // ✅ toast hook
   const { state } = useLocation();
   const { username: stateUsername, phoneNumber: statePhone, id: displayedUserIdFromState } = state || {};
 
@@ -310,12 +299,21 @@ const UserInfoPage = () => {
         },
       });
 
-      setCurrentProfilePic(res.data.updatedUrl);
+      const bustCacheUrl = `${res.data.updatedUrl}?t=${Date.now()}`;
+      setCurrentProfilePic(bustCacheUrl);
       setNewProfilePic(null);
-      alert('✅ Profile picture updated!');
+
+      toast({
+        title: '✅ Profile Picture Updated',
+        description: 'Your new profile picture is live.',
+      });
     } catch (err) {
       console.error('Upload failed:', err);
-      alert('Failed to update profile picture.');
+      toast({
+        variant: 'destructive',
+        title: 'Upload Failed',
+        description: 'Could not upload profile picture.',
+      });
     } finally {
       setLoadingUpload(false);
     }
@@ -325,15 +323,20 @@ const UserInfoPage = () => {
     const token = localStorage.getItem('token');
     try {
       await axios.delete(`https://chat-web-app-6330.onrender.com/api/v1/remove-profile-picture`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setCurrentProfilePic(null);
-      alert('✅ Profile picture removed.');
+      toast({
+        title: '✅ Profile Picture Removed',
+        description: 'You no longer have a profile picture.',
+      });
     } catch (err) {
       console.error('Removal failed:', err);
-      alert('Failed to remove profile picture.');
+      toast({
+        variant: 'destructive',
+        title: 'Failed to Remove',
+        description: 'Could not remove profile picture.',
+      });
     }
   };
 
@@ -359,41 +362,66 @@ const UserInfoPage = () => {
       </div>
 
       <div className="max-w-md mx-auto bg-white/5 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-md text-center">
-        <div className="w-24 h-24 mx-auto mb-2 relative">
+        <div className="relative w-24 h-24 mx-auto mb-4">
           <Avatar className="w-full h-full">
             {currentProfilePic ? (
-              <AvatarImage src={currentProfilePic} alt={`${username || 'User'}'s profile`} className="object-cover" />
+              <AvatarImage
+                src={currentProfilePic}
+                alt={`${username || 'User'}'s profile`}
+                className="object-cover"
+              />
             ) : (
               <AvatarFallback className="w-full h-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-3xl font-bold">
                 {getInitials()}
               </AvatarFallback>
             )}
           </Avatar>
-        </div>
 
-        {isMyProfile && (
-          <div className="flex justify-center gap-3 mt-3">
-            <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2 h-10 w-10 flex items-center justify-center shadow-md cursor-pointer">
-              {currentProfilePic ? <Edit className="h-5 w-5" /> : <Upload className="h-5 w-5" />}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-            {currentProfilePic && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 h-10 w-10"
-                onClick={handleRemoveProfilePic}
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
-            )}
-          </div>
-        )}
+          {isMyProfile && (
+            <>
+              {!currentProfilePic ? (
+                <label className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 h-8 w-8 flex items-center justify-center shadow-md cursor-pointer">
+                  {loadingUpload ? (
+                    <Loader2 className="animate-spin h-4 w-4" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="absolute bottom-0 right-0 flex gap-1">
+                  <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 h-8 w-8 flex items-center justify-center shadow-md cursor-pointer">
+                    {loadingUpload ? (
+                      <Loader2 className="animate-spin h-4 w-4" />
+                    ) : (
+                      <Edit className="h-4 w-4" />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-red-600 hover:bg-red-700 text-white rounded-full p-1 h-8 w-8"
+                    onClick={handleRemoveProfilePic}
+                    disabled={loadingUpload}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
         <h2 className="mt-4 text-2xl font-semibold">
           {username?.trim() ? username : 'Unknown User'}
