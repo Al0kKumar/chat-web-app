@@ -23,6 +23,9 @@ model User {
   otp                 String?
   otpCreatedat        DateTime?
 
+  profilePic          String?       
+  profilePicPublicId  String?   
+
   sentMessages        Messages[] @relation("SentMessages")
   receivedMessages    Messages[] @relation("ReceivedMessages")
 }
