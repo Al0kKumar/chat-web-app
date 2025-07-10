@@ -38,11 +38,7 @@ const OtpVerification = () => {
         localStorage.setItem('token',token);
       }
 
-      token = res.data;
 
-      if(token){
-        localStorage.setItem('token',token);
-      }
 
       // Decide where to go next
       if (from === 'google') {
