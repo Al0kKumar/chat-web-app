@@ -119,7 +119,7 @@ const UserInfoPage = () => {
   const handleRemoveProfilePic = async () => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`https://chat-web-app-6330.onrender.com/api/v1/remove-profile-picture`, {
+      await axios.delete(`https://chat-web-app-6330.onrender.com/api/v1/remove-profile-pic`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCurrentProfilePic(null);
