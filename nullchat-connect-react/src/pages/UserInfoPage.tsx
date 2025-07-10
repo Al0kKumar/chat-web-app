@@ -147,7 +147,6 @@
 
 
 
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Loader2, Trash2, Upload } from 'lucide-react';
@@ -158,14 +157,19 @@ import axios from 'axios';
 const UserInfoPage = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { username, phoneNumber, id: displayedUserId, profilePic } = state || {};
+  const { username: stateUsername, phoneNumber: statePhone, id: displayedUserIdFromState } = state || {};
 
   const [authenticatedUserId, setAuthenticatedUserId] = useState<number | null>(null);
   const [isLoadingAuthId, setIsLoadingAuthId] = useState(true);
   const [newProfilePic, setNewProfilePic] = useState<File | null>(null);
   const [loadingUpload, setLoadingUpload] = useState(false);
-  const [currentProfilePic, setCurrentProfilePic] = useState(profilePic); // Track live state
+  const [currentProfilePic, setCurrentProfilePic] = useState<string | null>(null);
 
+  const [username, setUsername] = useState(stateUsername || '');
+  const [phoneNumber, setPhoneNumber] = useState(statePhone || '');
+  const [displayedUserId, setDisplayedUserId] = useState<number | null>(displayedUserIdFromState || null);
+
+  // STEP 1: Fetch Authenticated User ID
   useEffect(() => {
     const fetchAuthUserId = async () => {
       const token = localStorage.getItem('token');
@@ -180,7 +184,20 @@ const UserInfoPage = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+
         setAuthenticatedUserId(response.data.id);
+        if (!displayedUserId) {
+          setDisplayedUserId(response.data.id); // fallback
+        }
+
+        // If viewing own profile, use full data from backend
+        if (!displayedUserIdFromState || response.data.id === displayedUserIdFromState) {
+          setUsername(response.data.username);
+          setPhoneNumber(response.data.phoneNumber);
+          setCurrentProfilePic(response.data.profilePic);
+        } else {
+          setCurrentProfilePic(state?.profilePic || null);
+        }
       } catch (err) {
         console.error('❌ Auth fetch failed:', err);
         localStorage.clear();
@@ -191,7 +208,7 @@ const UserInfoPage = () => {
     };
 
     fetchAuthUserId();
-  }, [navigate]);
+  }, [navigate, displayedUserId, displayedUserIdFromState, state]);
 
   const isMyProfile = !isLoadingAuthId && authenticatedUserId === displayedUserId;
 
@@ -226,7 +243,7 @@ const UserInfoPage = () => {
 
       setCurrentProfilePic(res.data.updatedUrl);
       setNewProfilePic(null);
-      alert('Profile picture updated!');
+      alert('✅ Profile picture updated!');
     } catch (err) {
       console.error('Upload failed:', err);
       alert('Failed to update profile picture.');
@@ -244,7 +261,7 @@ const UserInfoPage = () => {
         },
       });
       setCurrentProfilePic(null);
-      alert('Profile picture removed.');
+      alert('✅ Profile picture removed.');
     } catch (err) {
       console.error('Removal failed:', err);
       alert('Failed to remove profile picture.');
@@ -284,21 +301,18 @@ const UserInfoPage = () => {
             )}
           </Avatar>
 
-          {/* 👇 Conditionally render profile picture action buttons */}
           {isMyProfile && (
             <>
               {!currentProfilePic ? (
-                <>
-                  <label className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 h-8 w-8 flex items-center justify-center shadow-md cursor-pointer">
-                    <Upload className="h-4 w-4" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </label>
-                </>
+                <label className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 h-8 w-8 flex items-center justify-center shadow-md cursor-pointer">
+                  <Upload className="h-4 w-4" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
               ) : (
                 <div className="absolute bottom-0 right-0 flex gap-1">
                   <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 h-8 w-8 flex items-center justify-center shadow-md cursor-pointer">
