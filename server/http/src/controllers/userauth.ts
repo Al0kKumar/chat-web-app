@@ -314,7 +314,7 @@ const userDetails = async (req: Request, res: Response) => {
 const recipentdetails = async (req: Request,res: Response) => {
    
     try {
-        const userId = req.query.userId;
+        const { userId } = req.params;
 
         if (!userId || typeof userId !== 'string') {
             return res.status(400).json({ msg: 'Invalid userId' });

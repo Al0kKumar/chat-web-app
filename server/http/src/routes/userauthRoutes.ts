@@ -17,7 +17,7 @@ router.post("/auth/google", googleAuth);
 
 router.post("/auth/google/complete-profile", completeGoogleProfile);
 
-router.get('/recipentdetails', auth, recipentdetails )
+router.get('/recipentdetails/:userId', auth, recipentdetails )
 
 router.get('/userDetails', auth, userDetails)
 
