@@ -110,7 +110,11 @@ const ChatPage = () => {
         className="flex-1 ml-4 flex items-center space-x-3 cursor-pointer hover:bg-white/5 px-2 py-2 rounded-md transition"
         onClick={() =>
           navigate(`/user/${conversationId}`, {
-            state: { username, phoneNumber },
+            state: {
+                username: username,
+                phoneNumber: phoneNumber,
+                id: Number(conversationId),  
+              },
           })
         }
       >
