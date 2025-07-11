@@ -245,8 +245,6 @@
 
 // export default Dashboard;
 
-
-
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import {
@@ -301,6 +299,7 @@ const Dashboard = () => {
           }
         );
         setCurrentUser(response.data);
+        console.log('✅ Current user:', response.data);
       } catch (error) {
         console.error('❌ Error fetching current user info:', error);
         if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -326,6 +325,7 @@ const Dashboard = () => {
             },
           }
         );
+        console.log('💬 Conversations response:', response.data); // LOG here
         setConversations(response.data);
       } catch (error) {
         console.error('❌ Error fetching conversations:', error);
@@ -432,13 +432,11 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <Avatar className="h-12 w-12">
-                      {conversation.profilePic ? (
-                        <AvatarImage
-                          src={`${conversation.profilePic}?t=${Date.now()}`}
-                          alt="Profile"
-                          className="object-cover"
-                        />
-                      ) : null}
+                      <AvatarImage
+                        src={conversation.profilePic ? `${conversation.profilePic}?t=${Date.now()}` : ''}
+                        alt="Profile"
+                        className="object-cover"
+                      />
                       <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
                         {conversation.userName
                           ?.split(' ')
