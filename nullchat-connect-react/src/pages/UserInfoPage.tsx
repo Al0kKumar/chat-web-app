@@ -160,9 +160,9 @@ const UserInfoPage = () => {
 
       <div className="max-w-md mx-auto bg-white/5 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-md text-center">
         <div className="w-24 h-24 mx-auto mb-2 relative">
-          <Avatar className="w-full h-full">
+          <Avatar key={currentProfilePic} className="w-full h-full">
              {currentProfilePic ? (
-               <AvatarImage key={currentProfilePic} src={currentProfilePic} alt={`${username || 'User'}'s profile`} className="object-cover" />
+               <AvatarImage  src={currentProfilePic} alt={`${username || 'User'}'s profile`} className="object-cover" />
              ) : (
                <AvatarFallback className="w-full h-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-3xl font-bold">
                  {getInitials()}
