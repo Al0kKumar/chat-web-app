@@ -42,70 +42,57 @@ const search = async (req: Request, res: Response) => {
 };
 
 
+
+
 // // get all chats with the users/ conversations
 // const getAllchats = async (req: Request, res: Response) => {
-   
-//     const userid = Number(req.user.id);
+//   const userId = Number(req.user.id);
 
+//   // Step 1: Fetch all messages where the user is either sender or receiver, ordered by latest first
+//   const messages = await prisma.messages.findMany({
+//     where: {
+//       OR: [
+//         { senderid: userId },
+//         { receiverid: userId }
+//       ]
+//     },
+//     orderBy: {
+//       timestamp: 'desc'
+//     }
+//   });
 
-//     const chats = await prisma.messages.findMany({
-//         where: {
-//           OR: [
-//             { senderid: userid},
-//             { receiverid: userid }
-//           ]
-//         },
-//         orderBy: {
-//           timestamp: 'desc' // Order by latest message timestamp
-//         }
-//       });
-  
-//       // Extract unique chat partners and last message for each
-//       const uniqueChats = [];
-//       const seenUserIds = new Set();
-  
-//       for (const chat of chats) {
-//         // Determine the chat partner
-//         const partnerId = chat.senderid === userid ? chat.receiverid : chat.senderid;
-  
-//         if (!seenUserIds.has(partnerId)) {
-//           const partner = await prisma.user.findUnique({
-//             where: { id: partnerId },
-//             select: {
-//               id: true,
-//               name: true,
-//               phoneNumber: true,
-//             }
-//           });
-  
-//           const lastMessage = await prisma.messages.findFirst({
-//             where: { 
-//               OR: [
-//                 { senderid: userid, receiverid: partnerId },
-//                 { senderid: partnerId, receiverid: userid }
-//               ]
-//             },
-//             orderBy: { timestamp: 'desc' },
-//             select: { content: true, timestamp: true }
-//           });
-  
-//           uniqueChats.push({
-//             userid: partner.id,
-//             userName: partner.name,
-//             phoneNumber: partner.phoneNumber,
-//             lastMessage: lastMessage.content,
-//             lastMessageTime: lastMessage.timestamp
-//           });
-  
-//           seenUserIds.add(partnerId);
-//         }
+//   // Step 2: Prepare a map to track latest message per unique partner
+//   const seen = new Set<number>();
+//   const chatSummaries = [];
+
+//   for (const msg of messages) {
+//     const partnerId = msg.senderid === userId ? msg.receiverid : msg.senderid;
+
+//     if (seen.has(partnerId)) continue;
+
+//     const partner = await prisma.user.findUnique({
+//       where: { id: partnerId },
+//       select: {
+//         id: true,
+//         name: true,
+//         phoneNumber: true
 //       }
-  
-//       res.json(uniqueChats);
-// }
+//     });
 
+//     chatSummaries.push({
+//       id: partner?.id,
+//       userName: partner?.name,
+//       phoneNumber: partner?.phoneNumber,
+//       lastMessage: msg.content,
+//       lastMessageTime: msg.timestamp
+//     });
 
-// get all chats with the users/ conversations
+//     seen.add(partnerId);
+//   }
+
+//   res.json(chatSummaries);
+// };
+
 const getAllchats = async (req: Request, res: Response) => {
   const userId = Number(req.user.id);
 
@@ -122,7 +109,7 @@ const getAllchats = async (req: Request, res: Response) => {
     }
   });
 
-  // Step 2: Prepare a map to track latest message per unique partner
+  // Step 2: Track latest message per unique conversation partner
   const seen = new Set<number>();
   const chatSummaries = [];
 
@@ -131,12 +118,14 @@ const getAllchats = async (req: Request, res: Response) => {
 
     if (seen.has(partnerId)) continue;
 
+    // 🔥 Fetch partner details including profilePic
     const partner = await prisma.user.findUnique({
       where: { id: partnerId },
       select: {
         id: true,
         name: true,
-        phoneNumber: true
+        phoneNumber: true,
+        profilePic: true, // ✅ Add this line
       }
     });
 
@@ -144,6 +133,7 @@ const getAllchats = async (req: Request, res: Response) => {
       id: partner?.id,
       userName: partner?.name,
       phoneNumber: partner?.phoneNumber,
+      profilePic: partner?.profilePic, // ✅ Add this in response
       lastMessage: msg.content,
       lastMessageTime: msg.timestamp
     });
