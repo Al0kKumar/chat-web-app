@@ -162,7 +162,7 @@ const UserInfoPage = () => {
         <div className="w-24 h-24 mx-auto mb-2 relative">
           <Avatar className="w-full h-full">
              {currentProfilePic ? (
-               <AvatarImage src={currentProfilePic} alt={`${username || 'User'}'s profile`} className="object-cover" />
+               <AvatarImage key={currentProfilePic} src={currentProfilePic} alt={`${username || 'User'}'s profile`} className="object-cover" />
              ) : (
                <AvatarFallback className="w-full h-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-3xl font-bold">
                  {getInitials()}
@@ -170,30 +170,6 @@ const UserInfoPage = () => {
              )}
            </Avatar>
          </div>
-
-         {/* {isMyProfile && (
-           <div className="flex justify-center gap-3 mt-3">
-             <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2 h-10 w-10 flex items-center justify-center shadow-md cursor-pointer">
-               {currentProfilePic ? <Edit className="h-5 w-5" /> : <Upload className="h-5 w-5" />}
-               <input
-                 type="file"
-                 accept="image/*"
-                 onChange={handleImageChange}
-                 className="hidden"
-               />
-             </label>
-             {currentProfilePic && (
-               <Button
-                 variant="ghost"
-                 size="icon"
-                 className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 h-10 w-10"
-                 onClick={handleRemoveProfilePic}
-               >
-                 <Trash2 className="h-5 w-5" />
-               </Button>
-             )}
-           </div>
-         )} */}
 
          {isMyProfile && (
           <div className="flex justify-center gap-3 mt-3">
