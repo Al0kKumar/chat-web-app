@@ -432,11 +432,13 @@ const Dashboard = () => {
         <div className="flex-1 overflow-y-auto">
           {displayConversations.length > 0 ? (
             displayConversations.map((conversation: any) => (
+
               <div
                 key={conversation.id}
                 onClick={() => handleClick(conversation)}
                 className="p-4 border-b border-white/5 cursor-pointer transition-all duration-200 hover:bg-white/10"
               >
+
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <Avatar className="h-12 w-12">
@@ -461,9 +463,9 @@ const Dashboard = () => {
                           .toUpperCase() || conversation.phoneNumber?.slice(-2)}
                       </AvatarFallback>
                     </Avatar>
-                    {conversation.isOnline && (
+                    {/* {conversation.isOnline && (
                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
-                    )}
+                    )} */}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
