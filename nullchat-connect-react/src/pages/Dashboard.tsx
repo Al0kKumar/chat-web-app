@@ -8,256 +8,6 @@
 // } from 'lucide-react';
 // import { Input } from '@/components/ui/input';
 // import { Button } from '@/components/ui/button';
-// import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-// import { usePhoneSearch } from '@/hooks/usePhoneSearch';
-// import axios from 'axios';
-// import { formatMessageTimestamp } from '@/utils/timeFormatter';
-// import {
-//   DropdownMenu,
-//   DropdownMenuTrigger,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-// } from '@/components/ui/dropdown-menu'; // shadcn-style
-
-// interface CurrentUser {
-//   id: number;
-//   name: string;
-//   email: string;
-//   phoneNumber: string;
-//   profilePic?: string; 
-// }
-
-// const Dashboard = () => {
-//   const navigate = useNavigate();
-//   const [searchQuery, setSearchQuery] = useState('');
-//   const { searchResults, isSearching, searchByPhone, clearSearch } = usePhoneSearch();
-//   const [conversations, setConversations] = useState<any[]>([]);
-//   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-
-
-
-//   useEffect(() => {
-//     const fetchCurrentUser = async () => {
-//       const token = localStorage.getItem('token');
-//       if (!token) {
-//         // If no token, user is not logged in, redirect to login
-//         navigate('/login');
-//         return;
-//       }
-
-//       try {
-//         // Assuming your backend has an endpoint like /api/users/me
-//         const response = await axios.get<CurrentUser>(
-//           'https://chat-web-app-6330.onrender.com/api/v1/userDetails', // <--- Your new endpoint
-//           {
-//             headers: {
-//               Authorization: `Bearer ${token}`,
-//             },
-//           }
-//         );
-//         setCurrentUser(response.data);
-//       //  console.log('👤 Fetched current user info:', response.data);
-//       } catch (error) {
-//         console.error('❌ Error fetching current user info:', error);
-//         // Handle token expiry or other auth errors
-//         if (axios.isAxiosError(error) && error.response?.status === 401) {
-//           localStorage.clear();
-//           navigate('/login');
-//         }
-//       } 
-//     };
-
-//     fetchCurrentUser();
-//   }, [navigate]);
-
-//   useEffect(() => {
-//     const fetchConversations = async () => {
-//       const token = localStorage.getItem('token');
-//       try {
-//         const response = await axios.get(
-//           'https://chat-web-app-6330.onrender.com/api/v1/getchats',
-//           {
-//             withCredentials: true,
-//             headers: {
-//               Authorization: `Bearer ${token}`,
-//             },
-//           }
-//         );
-//       //  console.log('📡 Fetched conversations:', response.data);
-//         setConversations(response.data);
-//       } catch (error) {
-//         console.error('❌ Error fetching conversations:', error);
-//       }
-//     };
-
-//     fetchConversations();
-//   }, []);
-
-//   useEffect(() => {
-//     const timeoutId = setTimeout(() => {
-//       const isPhone = /^\+?\d+$/.test(searchQuery.trim());
-//       if (searchQuery.trim() && isPhone) {
-//         console.log('📞 Searching by phone:', searchQuery);
-//         searchByPhone(searchQuery.trim());
-//       } else {
-//         clearSearch();
-//       }
-//     }, 500);
-//     return () => clearTimeout(timeoutId);
-//   }, [searchQuery, searchByPhone, clearSearch]);
-
-//   const handleClick = (conversation: { userName?: string; phoneNumber?: string; id: string}) => 
-//     navigate(`/chat/${conversation.id}`, {
-//      state: {
-//       username: conversation.userName,
-//       id: conversation.id,
-//       phoneNumber: conversation.phoneNumber
-//     },
-//   });
-
-//   const displayConversations = useMemo(() => {
-//     const result = searchQuery.trim() ? searchResults : conversations;
-//   //  console.log('📡 Conversations to render:', result);
-//     return result;
-//   }, [searchQuery, searchResults, conversations]);
-
-//   return (
-//     <div className="flex h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-//       {/* Sidebar */}
-//       <div className="w-full md:w-96 flex flex-col border-r border-white/10">
-//         {/* Header */}
-//         <div className="p-4 border-b border-white/10">
-//           <div className="flex items-center justify-between mb-4">
-//             <div className="flex items-center">
-//               <MessageSquare className="h-8 w-8 text-purple-400 mr-3" />
-//               <h1 className="text-2xl font-bold text-white">Nullchat</h1>
-//             </div>
-//             <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-//               {/* <MoreVertical className="h-5 w-5" /> */}
-//               <DropdownMenu>
-//               <DropdownMenuTrigger asChild>
-//                 <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-//                   <MoreVertical className="h-5 w-5" />
-//                 </Button>
-//               </DropdownMenuTrigger>
-//               <DropdownMenuContent className="bg-slate-800 border-white/10 text-white">
-//                 <DropdownMenuItem className="cursor-pointer" 
-//                 onClick={() =>  navigate(`/user/me`, {
-//                   state: {
-//                           username: currentUser.name, // Use currentUser.name
-//                           phoneNumber: currentUser.phoneNumber, // Use currentUser.phoneNumber
-//                         },
-//                 })}>
-//                   👤 My Info
-//                 </DropdownMenuItem>
-//                 <DropdownMenuItem className="cursor-pointer"
-//                   onClick={() => {
-//                     localStorage.clear(); // or just remove token
-//                     navigate('/login');
-//                   }}
-//                 >
-//                   🚪 Logout
-//                 </DropdownMenuItem>
-//               </DropdownMenuContent>
-//             </DropdownMenu>
-//             </Button>
-//           </div>
-
-//           <div className="relative">
-//             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
-//             {isSearching && (
-//               <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300 animate-spin" />
-//             )}
-//             <Input
-//               placeholder="Search by phone number..."
-//               value={searchQuery}
-//               onChange={(e) => setSearchQuery(e.target.value)}
-//               className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300 focus:bg-white/15"
-//             />
-//           </div>
-//         </div>
-
-//         {/* Conversations */}
-//         <div className="flex-1 overflow-y-auto">
-//           {displayConversations.length > 0 ? (
-//             displayConversations.map((conversation: any) => {
-//        //       console.log('🧱 Rendering conversation item:', conversation);
-//               return (
-//                 <div
-//                   key={conversation.id}
-//                   onClick={() => handleClick(conversation)}
-//                   className="p-4 border-b border-white/5 cursor-pointer transition-all duration-200 hover:bg-white/10"
-//                 >
-//                   <div className="flex items-center space-x-3">
-//                     <div className="relative">
-//                       <Avatar className="h-12 w-12">
-//                         <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-//                           {conversation.userName
-//                             ?.split(' ')
-//                             .map((n: string) => n[0])
-//                             .join('')
-//                             .slice(0, 2)
-//                             .toUpperCase()}
-//                         </AvatarFallback>
-//                       </Avatar>
-//                       {conversation.isOnline && (
-//                         <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
-//                       )}
-//                     </div>
-//                     <div className="flex-1 min-w-0">
-//                       <div className="flex items-center justify-between">
-//                         <h3 className="font-semibold text-white truncate">
-//                           {conversation.userName || conversation.phoneNumber}
-//                         </h3>
-//                         {conversation.lastMessageTime && (
-//                           <span className="text-xs text-purple-300">
-//                             {formatMessageTimestamp(conversation.lastMessageTime)}
-//                           </span>
-//                         )}
-//                       </div>
-//                       {conversation.lastMessage ? (
-//                         <p className="text-sm text-purple-200 truncate mt-1">
-//                           {conversation.lastMessage}
-//                         </p>
-//                       ) : (
-//                         <p className="text-sm text-purple-500 italic mt-1">No messages yet.</p>
-//                       )}
-//                     </div>
-//                   </div>
-//                 </div>
-//               );
-//             })
-//           ) : (
-//             <div className="text-center text-purple-400 mt-10">
-//               {searchQuery ? 'No users found.' : 'No conversations yet.'}
-//             </div>
-//           )}
-//         </div>
-//       </div>
-
-//       {/* Fallback panel */}
-//       <div className="hidden md:flex flex-1 items-center justify-center text-purple-300 text-xl">
-//         Select a chat to start messaging
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Dashboard;
-
-
-
-
-// import { useNavigate } from 'react-router-dom';
-// import { useState, useEffect, useMemo } from 'react';
-// import {
-//   Search,
-//   MessageSquare,
-//   Loader2,
-//   MoreVertical,
-// } from 'lucide-react';
-// import { Input } from '@/components/ui/input';
-// import { Button } from '@/components/ui/button';
 // import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 // import { usePhoneSearch } from '@/hooks/usePhoneSearch';
 // import axios from 'axios';
@@ -435,11 +185,14 @@
 //                 <div className="flex items-center space-x-3">
 //                   <div className="relative">
 //                     <Avatar className="h-12 w-12">
-//                       <AvatarImage
-//                         src={conversation.profilePic ? `${conversation.profilePic}?t=${Date.now()}` : ''}
-//                         alt="Profile"
-//                         className="object-cover"
-//                       />
+//                       {/* Conditionally render AvatarImage if profilePic exists */}
+//                       {conversation.profilePic ? (
+//                         <AvatarImage
+//                           src={`${conversation.profilePic}?t=${Date.now()}`}
+//                           alt="Profile"
+//                           className="object-cover"
+//                         />
+//                       ) : null}
 //                       <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
 //                         {conversation.userName
 //                           ?.split(' ')
@@ -492,8 +245,6 @@
 // };
 
 // export default Dashboard;
-
-
 
 
 
@@ -578,6 +329,11 @@ const Dashboard = () => {
           }
         );
         console.log('💬 Conversations response:', response.data); // LOG here
+        // --- ADDED DEBUGGING LOGS HERE ---
+        response.data.forEach((conv: any) => {
+          console.log(`Conversation ID: ${conv.id}, Profile Pic: ${conv.profilePic}, Type: ${typeof conv.profilePic}`);
+        });
+        // --- END ADDED DEBUGGING LOGS ---
         setConversations(response.data);
       } catch (error) {
         console.error('❌ Error fetching conversations:', error);
@@ -684,12 +440,16 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <Avatar className="h-12 w-12">
-                      {/* Conditionally render AvatarImage if profilePic exists */}
+                      {/* {console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)}
+                      --- END ADDED DEBUGGING LOGS --- */}
                       {conversation.profilePic ? (
                         <AvatarImage
                           src={`${conversation.profilePic}?t=${Date.now()}`}
                           alt="Profile"
                           className="object-cover"
+                          // --- ADDED onError handler for debugging ---
+                          onError={(e) => console.error(`Error loading image for ${conversation.userName || conversation.phoneNumber}: ${e.currentTarget.src}`)}
+                          // --- END ADDED onError handler ---
                         />
                       ) : null}
                       <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
