@@ -439,8 +439,8 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <Avatar className="h-12 w-12">
-                      {/* Conditionally render AvatarImage if profilePic exists */}
-                      console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)
+                      
+                      {/* {console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)} */}
                       {conversation.profilePic ? (
                         <AvatarImage
                           src={`${conversation.profilePic}?t=${Date.now()}`}
@@ -500,3 +500,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
