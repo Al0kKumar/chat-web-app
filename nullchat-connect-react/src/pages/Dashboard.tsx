@@ -439,15 +439,22 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <Avatar className="h-12 w-12">
-                      
-                      {/* {console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)} */}
+                      {/* NEW LOGIC: Directly use img tag within Avatar */}
                       {conversation.profilePic ? (
-                        <AvatarImage
+                        <img
                           src={`${conversation.profilePic}?t=${Date.now()}`}
                           alt="Profile"
-                          className="object-cover"
-                          key={conversation.profilePic} // Forces re-render if profilePic URL changes
-                          onError={(e) => console.error(`Error loading image for ${conversation.userName || conversation.phoneNumber}: ${e.currentTarget.src}`)}
+                          className="h-full w-full object-cover" // Ensure it covers the Avatar space
+                          onError={(e) => {
+                            // If image fails to load, update the conversation object
+                            // to effectively hide the img and show fallback
+                            // This requires a new state/variable for each image status if you want persistent fallback
+                            // For simplicity, we'll just log here, as the AvatarFallback will show anyway.
+                            console.error(`Error loading image for ${conversation.userName || conversation.phoneNumber}: ${e.currentTarget.src}`);
+                            // A more robust solution might set a 'hasImageError' flag on the conversation object
+                            // and trigger a re-render to ensure fallback is displayed.
+                            // For now, rely on AvatarFallback if img doesn't load/render correctly.
+                          }}
                         />
                       ) : null}
                       <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
@@ -459,7 +466,6 @@ const Dashboard = () => {
                           .toUpperCase() || conversation.phoneNumber?.slice(-2)}
                       </AvatarFallback>
                     </Avatar>
-                    {/* Removed the isOnline indicator div */}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
@@ -500,4 +506,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
