@@ -247,7 +247,6 @@
 // export default Dashboard;
 
 
-
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import {
@@ -432,26 +431,23 @@ const Dashboard = () => {
         <div className="flex-1 overflow-y-auto">
           {displayConversations.length > 0 ? (
             displayConversations.map((conversation: any) => (
-
               <div
                 key={conversation.id}
                 onClick={() => handleClick(conversation)}
                 className="p-4 border-b border-white/5 cursor-pointer transition-all duration-200 hover:bg-white/10"
               >
-
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <Avatar className="h-12 w-12">
-                      {/* {console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)}
-                      --- END ADDED DEBUGGING LOGS --- */}
+                      {/* Conditionally render AvatarImage if profilePic exists */}
+                      console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)
                       {conversation.profilePic ? (
                         <AvatarImage
                           src={`${conversation.profilePic}?t=${Date.now()}`}
                           alt="Profile"
                           className="object-cover"
-                          // --- ADDED onError handler for debugging ---
+                          key={conversation.profilePic} // Forces re-render if profilePic URL changes
                           onError={(e) => console.error(`Error loading image for ${conversation.userName || conversation.phoneNumber}: ${e.currentTarget.src}`)}
-                          // --- END ADDED onError handler ---
                         />
                       ) : null}
                       <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
@@ -463,9 +459,7 @@ const Dashboard = () => {
                           .toUpperCase() || conversation.phoneNumber?.slice(-2)}
                       </AvatarFallback>
                     </Avatar>
-                    {/* {conversation.isOnline && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
-                    )} */}
+                    {/* Removed the isOnline indicator div */}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
