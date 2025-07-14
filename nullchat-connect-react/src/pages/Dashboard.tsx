@@ -1,5 +1,3 @@
-
-
 // import { useNavigate } from 'react-router-dom';
 // import { useState, useEffect, useMemo } from 'react';
 // import {
@@ -10,7 +8,7 @@
 // } from 'lucide-react';
 // import { Input } from '@/components/ui/input';
 // import { Button } from '@/components/ui/button';
-// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // AvatarImage is no longer used, but kept in imports for now
 // import { usePhoneSearch } from '@/hooks/usePhoneSearch';
 // import axios from 'axios';
 // import { formatMessageTimestamp } from '@/utils/timeFormatter';
@@ -80,12 +78,10 @@
 //             },
 //           }
 //         );
-//         console.log('💬 Conversations response:', response.data); // LOG here
-//         // --- ADDED DEBUGGING LOGS HERE ---
+//         console.log('💬 Conversations response:', response.data);
 //         response.data.forEach((conv: any) => {
 //           console.log(`Conversation ID: ${conv.id}, Profile Pic: ${conv.profilePic}, Type: ${typeof conv.profilePic}`);
 //         });
-//         // --- END ADDED DEBUGGING LOGS ---
 //         setConversations(response.data);
 //       } catch (error) {
 //         console.error('❌ Error fetching conversations:', error);
@@ -192,21 +188,16 @@
 //                 <div className="flex items-center space-x-3">
 //                   <div className="relative">
 //                     <Avatar className="h-12 w-12">
-//                       {/* NEW LOGIC: Directly use img tag within Avatar */}
+//                       {/* {console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)} */}
 //                       {conversation.profilePic ? (
 //                         <img
 //                           src={`${conversation.profilePic}?t=${Date.now()}`}
 //                           alt="Profile"
-//                           className="h-full w-full object-cover" // Ensure it covers the Avatar space
+//                           // ADDED 'absolute inset-0' HERE
+//                           className="absolute inset-0 h-full w-full object-cover"
 //                           onError={(e) => {
-//                             // If image fails to load, update the conversation object
-//                             // to effectively hide the img and show fallback
-//                             // This requires a new state/variable for each image status if you want persistent fallback
-//                             // For simplicity, we'll just log here, as the AvatarFallback will show anyway.
 //                             console.error(`Error loading image for ${conversation.userName || conversation.phoneNumber}: ${e.currentTarget.src}`);
-//                             // A more robust solution might set a 'hasImageError' flag on the conversation object
-//                             // and trigger a re-render to ensure fallback is displayed.
-//                             // For now, rely on AvatarFallback if img doesn't load/render correctly.
+//                             // Consider setting a state here to force AvatarFallback if image fails to load permanently
 //                           }}
 //                         />
 //                       ) : null}
@@ -262,9 +253,8 @@
 
 
 
-
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react'; // Import useRef
 import {
   Search,
   MessageSquare,
@@ -273,7 +263,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // AvatarImage is no longer used, but kept in imports for now
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'; // Removed AvatarImage from imports as it's not directly used
 import { usePhoneSearch } from '@/hooks/usePhoneSearch';
 import axios from 'axios';
 import { formatMessageTimestamp } from '@/utils/timeFormatter';
@@ -298,6 +288,12 @@ const Dashboard = () => {
   const { searchResults, isSearching, searchByPhone, clearSearch } = usePhoneSearch();
   const [conversations, setConversations] = useState<any[]>([]);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+
+  // --- NEW STATE FOR LOADER UX ---
+  const [showLoader, setShowLoader] = useState(false);
+  const loaderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const minDisplayTime = 300; // Minimum time in milliseconds the loader should be visible
+  // --- END NEW STATE FOR LOADER UX ---
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -356,17 +352,52 @@ const Dashboard = () => {
     fetchConversations();
   }, []);
 
+  // --- NEW EFFECT FOR LOADER UX CONTROL ---
+  useEffect(() => {
+    if (isSearching) {
+      // If a search is starting, immediately show the loader
+      setShowLoader(true);
+      // Clear any previous timeout that might be trying to hide the loader
+      if (loaderTimeoutRef.current) {
+        clearTimeout(loaderTimeoutRef.current);
+      }
+    } else {
+      // If the search has finished (isSearching is false)
+      // and the loader is currently shown
+      if (showLoader) {
+        // Schedule the loader to hide after a minimum display time
+        loaderTimeoutRef.current = setTimeout(() => {
+          setShowLoader(false);
+        }, minDisplayTime);
+      }
+    }
+
+    // Cleanup function: ensure any pending timeout is cleared when component unmounts
+    // or when dependencies change significantly.
+    return () => {
+      if (loaderTimeoutRef.current) {
+        clearTimeout(loaderTimeoutRef.current);
+      }
+    };
+  }, [isSearching, showLoader, minDisplayTime]); // Added showLoader and minDisplayTime as dependencies
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      const isPhone = /^\+?\d+$/.test(searchQuery.trim());
-      if (searchQuery.trim() && isPhone) {
-        searchByPhone(searchQuery.trim());
+      const trimmedQuery = searchQuery.trim();
+      const isPhone = /^\+?\d+$/.test(trimmedQuery);
+      if (trimmedQuery && isPhone) {
+        // Only trigger search if query is valid and not currently searching
+        // This check prevents unnecessary API calls if a search for the same query is already active
+        // and provides a small optimization. 'usePhoneSearch' should also handle this internally.
+        if (!isSearching) {
+          searchByPhone(trimmedQuery);
+        }
       } else {
         clearSearch();
       }
     }, 500);
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, searchByPhone, clearSearch]);
+  }, [searchQuery, searchByPhone, clearSearch, isSearching]); // Added isSearching as dependency here as well
 
   const handleClick = (conversation: { userName?: string; phoneNumber?: string; id: string }) =>
     navigate(`/chat/${conversation.id}`, {
@@ -429,7 +460,8 @@ const Dashboard = () => {
 
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
-            {isSearching && (
+            {/* --- USE showLoader STATE HERE --- */}
+            {showLoader && (
               <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300 animate-spin" />
             )}
             <Input
@@ -458,7 +490,6 @@ const Dashboard = () => {
                         <img
                           src={`${conversation.profilePic}?t=${Date.now()}`}
                           alt="Profile"
-                          // ADDED 'absolute inset-0' HERE
                           className="absolute inset-0 h-full w-full object-cover"
                           onError={(e) => {
                             console.error(`Error loading image for ${conversation.userName || conversation.phoneNumber}: ${e.currentTarget.src}`);
