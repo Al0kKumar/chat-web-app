@@ -486,31 +486,25 @@ const Dashboard = () => {
                 >
                   <div className="flex items-center space-x-3">
                     <Avatar className="h-12 w-12 relative overflow-hidden">
-                      {resolvedUrl ? (
-                        <AvatarImage
-                          src={resolvedUrl}
-                          alt={conversation.userName || conversation.phoneNumber}
-                          className="object-cover"
-                          onLoad={() => {
-                            console.log('✅ IMAGE LOADED:', resolvedUrl);
-                          }}
-                          onError={(e) => {
-                            console.error('❌ IMAGE FAILED:', resolvedUrl);
-                            console.error(e);
-                          }}
-                        />
-                      ) : (
-                        <AvatarFallback className="bg-gradient-to-r from-green-400 to-cyan-400 text-black font-semibold">
-                          {conversation.userName
-                            ?.split(' ')
-                            .map((n: string) => n[0])
-                            .join('')
-                            .slice(0, 2)
-                            .toUpperCase() ||
-                            conversation.phoneNumber?.slice(-2)}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
+                    {conversation.profilePic ? (
+                      <AvatarImage
+                        src={conversation.profilePic}
+                        alt={conversation.userName || conversation.phoneNumber}
+                        className="object-cover"
+                        loading="lazy"
+                      />
+                    ) : null}
+
+                    <AvatarFallback className="bg-gradient-to-r from-green-400 to-cyan-400 text-black font-semibold">
+                      {conversation.userName
+                        ?.split(' ')
+                        .map((n: string) => n[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase() ||
+                        conversation.phoneNumber?.slice(-2)}
+                    </AvatarFallback>
+                  </Avatar>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center">
