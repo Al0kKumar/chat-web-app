@@ -377,12 +377,15 @@ const UserInfoPage = () => {
 
   if (isLoadingAuthId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
-        <span className="ml-3">Loading profile...</span>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white">
+        <Loader2 className="h-8 w-8 animate-spin text-green-400" />
+        <span className="mt-3 text-sm text-zinc-400">
+          Loading profile…
+        </span>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-black text-white px-6 py-8">
