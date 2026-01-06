@@ -187,6 +187,18 @@ const Dashboard = () => {
               >
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-11 w-11">
+                    {conversation.profilePic ? (
+                      <AvatarImage
+                        src={`${conversation.profilePic}?t=${Date.now()}`}
+                        alt="Profile"
+                        className="object-cover"
+                        onError={(e) => {
+                          // fallback if image fails
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : null}
+
                     <AvatarFallback className="bg-gradient-to-r from-green-400 to-cyan-400 text-black font-semibold">
                       {conversation.userName
                         ?.split(' ')
@@ -197,6 +209,7 @@ const Dashboard = () => {
                         conversation.phoneNumber?.slice(-2)}
                     </AvatarFallback>
                   </Avatar>
+
 
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
