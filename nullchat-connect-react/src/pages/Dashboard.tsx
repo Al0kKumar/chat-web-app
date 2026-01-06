@@ -186,26 +186,29 @@ const Dashboard = () => {
                 className="p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition"
               >
                 <div className="flex items-center space-x-3">
-                  <Avatar className="h-11 w-11 overflow-hidden">
-                  {conversation.profilePic ? (
-                    <AvatarImage
-                      src={`${conversation.profilePic}?t=${Date.now()}`}
-                      alt="Profile"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <AvatarFallback className="bg-gradient-to-r from-green-400 to-cyan-400 text-black font-semibold">
-                      {conversation.userName
-                        ?.split(' ')
-                        .map((n: string) => n[0])
-                        .join('')
-                        .slice(0, 2)
-                        .toUpperCase() ||
-                        conversation.phoneNumber?.slice(-2)}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-
+                <Avatar className="h-12 w-12">
+                      {/* {console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)} */}
+                      {conversation.profilePic ? (
+                        <img
+                          src={`${conversation.profilePic}?t=${Date.now()}`}
+                          alt="Profile"
+                          // ADDED 'absolute inset-0' HERE
+                          className="absolute inset-0 h-full w-full object-cover"
+                          onError={(e) => {
+                            console.error(`Error loading image for ${conversation.userName || conversation.phoneNumber}: ${e.currentTarget.src}`);
+                            // Consider setting a state here to force AvatarFallback if image fails to load permanently
+                          }}
+                        />
+                      ) : null}
+                      <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                        {conversation.userName
+                          ?.split(' ')
+                          .map((n: string) => n[0])
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase() || conversation.phoneNumber?.slice(-2)}
+                      </AvatarFallback>
+                    </Avatar>
 
 
                   <div className="flex-1 min-w-0">
