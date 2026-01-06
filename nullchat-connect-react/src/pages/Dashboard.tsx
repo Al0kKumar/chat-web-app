@@ -187,7 +187,7 @@ const Dashboard = () => {
               >
                 <div className="flex items-center space-x-3">
                 <Avatar className="h-12 w-12">
-                      {/* {console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)} */}
+                     
                       {conversation.profilePic ? (
                         <img
                           src={`${conversation.profilePic}?t=${Date.now()}`}
@@ -199,8 +199,8 @@ const Dashboard = () => {
                             // Consider setting a state here to force AvatarFallback if image fails to load permanently
                           }}
                         />
-                      ) : null}
-                      <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                      ) : (
+                        <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
                         {conversation.userName
                           ?.split(' ')
                           .map((n: string) => n[0])
@@ -208,6 +208,15 @@ const Dashboard = () => {
                           .slice(0, 2)
                           .toUpperCase() || conversation.phoneNumber?.slice(-2)}
                       </AvatarFallback>
+                      )}
+                      {/* <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                        {conversation.userName
+                          ?.split(' ')
+                          .map((n: string) => n[0])
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase() || conversation.phoneNumber?.slice(-2)}
+                      </AvatarFallback> */}
                     </Avatar>
 
 
