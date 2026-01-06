@@ -186,19 +186,14 @@ const Dashboard = () => {
                 className="p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition"
               >
                 <div className="flex items-center space-x-3">
-                  <Avatar className="h-11 w-11">
-                    {conversation.profilePic ? (
-                      <AvatarImage
-                        src={`${conversation.profilePic}?t=${Date.now()}`}
-                        alt="Profile"
-                        className="object-cover"
-                        onError={(e) => {
-                          // fallback if image fails
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    ) : null}
-
+                  <Avatar className="h-11 w-11 overflow-hidden">
+                  {conversation.profilePic ? (
+                    <AvatarImage
+                      src={`${conversation.profilePic}?t=${Date.now()}`}
+                      alt="Profile"
+                      className="object-cover"
+                    />
+                  ) : (
                     <AvatarFallback className="bg-gradient-to-r from-green-400 to-cyan-400 text-black font-semibold">
                       {conversation.userName
                         ?.split(' ')
@@ -208,7 +203,9 @@ const Dashboard = () => {
                         .toUpperCase() ||
                         conversation.phoneNumber?.slice(-2)}
                     </AvatarFallback>
-                  </Avatar>
+                  )}
+                </Avatar>
+
 
 
                   <div className="flex-1 min-w-0">
