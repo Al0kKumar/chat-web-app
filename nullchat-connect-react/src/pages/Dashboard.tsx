@@ -187,37 +187,26 @@ const Dashboard = () => {
               >
                 <div className="flex items-center space-x-3">
                 <Avatar className="h-12 w-12">
-                     
-                      {conversation.profilePic ? (
-                        <img
-                          src={`${conversation.profilePic}?t=${Date.now()}`}
-                          alt="Profile"
-                          // ADDED 'absolute inset-0' HERE
-                          className="absolute inset-0 h-full w-full object-cover"
-                          onError={(e) => {
-                            console.error(`Error loading image for ${conversation.userName || conversation.phoneNumber}: ${e.currentTarget.src}`);
-                            // Consider setting a state here to force AvatarFallback if image fails to load permanently
-                          }}
-                        />
-                      ) : (
-                        <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-                        {conversation.userName
-                          ?.split(' ')
-                          .map((n: string) => n[0])
-                          .join('')
-                          .slice(0, 2)
-                          .toUpperCase() || conversation.phoneNumber?.slice(-2)}
-                      </AvatarFallback>
-                      )}
-                      {/* <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-                        {conversation.userName
-                          ?.split(' ')
-                          .map((n: string) => n[0])
-                          .join('')
-                          .slice(0, 2)
-                          .toUpperCase() || conversation.phoneNumber?.slice(-2)}
-                      </AvatarFallback> */}
-                    </Avatar>
+                  <AvatarImage
+                    src={
+                      conversation.profilePic
+                        ? `${conversation.profilePic}?t=${Date.now()}`
+                        : undefined
+                    }
+                    alt={conversation.userName || conversation.phoneNumber}
+                    className="object-cover"
+                  />
+
+                  <AvatarFallback className="bg-gradient-to-r from-green-400 to-cyan-400 text-black font-semibold">
+                    {conversation.userName
+                      ?.split(' ')
+                      .map((n: string) => n[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase() ||
+                      conversation.phoneNumber?.slice(-2)}
+                  </AvatarFallback>
+                </Avatar>
 
 
                   <div className="flex-1 min-w-0">
