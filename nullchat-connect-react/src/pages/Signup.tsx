@@ -93,97 +93,111 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-neutral-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        {/* Header */}
+        <div className="text-center mb-10">
           <div className="flex items-center justify-center mb-4">
-            <MessageSquare className="h-12 w-12 text-white mr-3" />
-            <h1 className="text-4xl font-bold text-white">Nullchat</h1>
+            <MessageSquare className="h-12 w-12 text-green-400 mr-3" />
+            <h1 className="text-4xl font-bold text-white tracking-wide">
+              Nullchat
+            </h1>
           </div>
-          <p className="text-purple-200">Connect with anyone, anywhere</p>
+          <p className="text-zinc-400">
+            Create a secure peer-to-peer account
+          </p>
         </div>
 
-        <Card className="backdrop-blur-lg bg-white/10 border-white/20 shadow-2xl">
+        {/* Card */}
+        <Card className="backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl">
           <CardHeader>
-            <CardTitle className="text-white text-center">Create Account</CardTitle>
-            <CardDescription className="text-purple-200 text-center">
-              Join Nullchat and start connecting
+            <CardTitle className="text-white text-center text-2xl">
+              Create Account
+            </CardTitle>
+            <CardDescription className="text-zinc-400 text-center">
+              No tracking. No middlemen.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+
+          <CardContent className="space-y-5">
             <form onSubmit={handleSignup} className="space-y-4">
+              {/* Username */}
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-400" />
                 <Input
                   name="username"
-                  type="text"
                   placeholder="Username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300"
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-zinc-500 focus:border-green-400"
                   required
                 />
               </div>
 
+              {/* Email */}
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-400" />
                 <Input
                   name="email"
                   type="email"
                   placeholder="Email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300"
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-zinc-500 focus:border-green-400"
                   required
                 />
               </div>
 
+              {/* Phone */}
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-400" />
                 <Input
                   name="phone"
-                  type="tel"
                   placeholder="Phone Number"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300"
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-zinc-500 focus:border-green-400"
                   required
                 />
               </div>
 
+              {/* Password */}
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-400" />
                 <Input
                   name="password"
                   type="password"
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300"
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-zinc-500 focus:border-green-400"
                   required
                 />
               </div>
 
+              {/* Submit */}
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+                className="w-full bg-gradient-to-r from-green-400 to-cyan-400 hover:from-green-500 hover:to-cyan-500 text-black font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105"
               >
-                {loading ? 'Creating Account...' : 'Create Account'}
+                {loading ? 'Creating Account…' : 'Create Account'}
               </Button>
             </form>
 
+            {/* Divider */}
             <div className="relative">
-              <Separator className="bg-white/20" />
-              <span className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 px-2 text-purple-200 text-sm">
+              <Separator className="bg-white/10" />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-black px-2 text-zinc-500 text-sm">
                 or
               </span>
             </div>
 
+            {/* Google */}
             <Button
-              onClick={handleGoogleSignup}
+              onClick={() => googleLogin()}
               variant="outline"
-              className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-300"
+              className="w-full bg-white/5 border-white/20 text-white hover:bg-white/10 transition-all"
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -206,9 +220,13 @@ const Signup = () => {
               Continue with Google
             </Button>
 
-            <p className="text-center text-purple-200 text-sm">
+            {/* Footer */}
+            <p className="text-center text-zinc-500 text-sm">
               Already have an account?{' '}
-              <Link to="/login" className="text-purple-300 hover:text-white font-semibold">
+              <Link
+                to="/login"
+                className="text-green-400 hover:text-cyan-400 font-semibold"
+              >
                 Sign in
               </Link>
             </p>

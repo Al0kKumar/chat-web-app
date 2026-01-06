@@ -64,59 +64,72 @@ const ProfileUpload = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        {/* Header */}
+        <div className="text-center mb-10">
           <div className="flex items-center justify-center mb-4">
-            <MessageSquare className="h-12 w-12 text-white mr-3" />
-            <h1 className="text-4xl font-bold text-white">Nullchat</h1>
+            <MessageSquare className="h-12 w-12 text-green-400 mr-3" />
+            <h1 className="text-4xl font-bold text-white tracking-wide">
+              Nullchat
+            </h1>
           </div>
         </div>
 
-        <Card className="backdrop-blur-lg bg-white/10 border-white/20 shadow-2xl">
+        {/* Card */}
+        <Card className="backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center">
-              <ImageIcon className="h-8 w-8 text-white" />
+            <div className="mx-auto mb-6 w-16 h-16 bg-gradient-to-r from-green-400 to-cyan-400 rounded-full flex items-center justify-center">
+              <ImageIcon className="h-8 w-8 text-black" />
             </div>
-            <CardTitle className="text-white">Upload Your Profile Picture</CardTitle>
-            <CardDescription className="text-purple-200">
-              Add a face to your name on Nullchat
+            <CardTitle className="text-white text-2xl">
+              Upload Profile Picture
+            </CardTitle>
+            <CardDescription className="text-zinc-400">
+              Add a face to your encrypted identity
             </CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-6">
+            {/* File input */}
             <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="block w-full text-sm text-white file:bg-purple-700 file:text-white file:px-4 file:py-2 file:rounded-lg file:border-none file:cursor-pointer"
+              className="block w-full text-sm text-zinc-300
+              file:bg-gradient-to-r file:from-green-400 file:to-cyan-400
+              file:text-black file:px-4 file:py-2 file:rounded-lg
+              file:border-none file:cursor-pointer"
             />
 
+            {/* Preview */}
             {previewUrl && (
               <div className="flex justify-center">
                 <img
                   src={previewUrl}
                   alt="Profile Preview"
-                  className="w-32 h-32 object-cover rounded-full border border-white/30"
+                  className="w-32 h-32 object-cover rounded-full border border-white/20"
                 />
               </div>
             )}
 
+            {/* Submit */}
             <Button
               onClick={handleSubmit}
               disabled={!imageFile || loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-green-400 to-cyan-400 hover:from-green-500 hover:to-cyan-500 text-black font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
             >
-              {loading ? 'Uploading...' : 'Finish & Enter App'}
+              {loading ? 'Uploading…' : 'Finish & Enter App'}
             </Button>
 
+            {/* Skip */}
             <Button
-                variant="ghost"
-                onClick={() => navigate('/dashboard')}
-                className="w-full text-purple-300 hover:text-white hover:bg-white/10"
-                >
-                Skip for now
+              variant="ghost"
+              onClick={() => navigate('/dashboard')}
+              className="w-full text-zinc-500 hover:text-white hover:bg-white/10"
+            >
+              Skip for now
             </Button>
-
           </CardContent>
         </Card>
       </div>

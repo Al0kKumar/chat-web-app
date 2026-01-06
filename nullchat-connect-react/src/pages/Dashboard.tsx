@@ -117,61 +117,61 @@ const Dashboard = () => {
   }, [searchQuery, searchResults, conversations]);
 
   return (
-    <div className="flex h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="flex h-screen w-full bg-black text-white">
       {/* Sidebar */}
-      <div className="w-full md:w-96 flex flex-col border-r border-white/10">
+      <div className="w-full md:w-96 flex flex-col border-r border-white/10 bg-zinc-950">
         {/* Header */}
         <div className="p-4 border-b border-white/10">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <MessageSquare className="h-8 w-8 text-purple-400 mr-3" />
-              <h1 className="text-2xl font-bold text-white">Nullchat</h1>
+              <MessageSquare className="h-7 w-7 text-green-400 mr-2" />
+              <h1 className="text-xl font-semibold tracking-wide">
+                Nullchat
+              </h1>
             </div>
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-slate-800 border-white/10 text-white">
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() =>
-                      navigate(`/user/me`, {
-                        state: {
-                          username: currentUser?.name,
-                          phoneNumber: currentUser?.phoneNumber,
-                        },
-                      })
-                    }
-                  >
-                    👤 My Info
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => {
-                      localStorage.clear();
-                      navigate('/login');
-                    }}
-                  >
-                    🚪 Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-5 w-5 text-zinc-400" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-zinc-900 border-white/10 text-white">
+                <DropdownMenuItem
+                  onClick={() =>
+                    navigate(`/user/me`, {
+                      state: {
+                        username: currentUser?.name,
+                        phoneNumber: currentUser?.phoneNumber,
+                      },
+                    })
+                  }
+                >
+                  👤 My Info
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    localStorage.clear();
+                    navigate('/login');
+                  }}
+                >
+                  🚪 Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
+          {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             {isSearching && (
-              <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-300 animate-spin" />
+              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-400 animate-spin" />
             )}
             <Input
-              placeholder="Search by phone number..."
+              placeholder="Search by phone number"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300 focus:bg-white/15"
+              className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-green-400"
             />
           </div>
         </div>
@@ -183,66 +183,58 @@ const Dashboard = () => {
               <div
                 key={conversation.id}
                 onClick={() => handleClick(conversation)}
-                className="p-4 border-b border-white/5 cursor-pointer transition-all duration-200 hover:bg-white/10"
+                className="p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <Avatar className="h-12 w-12">
-                      {/* {console.log(`Rendering Avatar for ${conversation.userName || conversation.phoneNumber}. profilePic: ${conversation.profilePic}`)} */}
-                      {conversation.profilePic ? (
-                        <img
-                          src={`${conversation.profilePic}?t=${Date.now()}`}
-                          alt="Profile"
-                          // ADDED 'absolute inset-0' HERE
-                          className="absolute inset-0 h-full w-full object-cover"
-                          onError={(e) => {
-                            console.error(`Error loading image for ${conversation.userName || conversation.phoneNumber}: ${e.currentTarget.src}`);
-                            // Consider setting a state here to force AvatarFallback if image fails to load permanently
-                          }}
-                        />
-                      ) : null}
-                      <AvatarFallback className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-                        {conversation.userName
-                          ?.split(' ')
-                          .map((n: string) => n[0])
-                          .join('')
-                          .slice(0, 2)
-                          .toUpperCase() || conversation.phoneNumber?.slice(-2)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
+                  <Avatar className="h-11 w-11">
+                    <AvatarFallback className="bg-gradient-to-r from-green-400 to-cyan-400 text-black font-semibold">
+                      {conversation.userName
+                        ?.split(' ')
+                        .map((n: string) => n[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase() ||
+                        conversation.phoneNumber?.slice(-2)}
+                    </AvatarFallback>
+                  </Avatar>
+
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-white truncate">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-medium truncate">
                         {conversation.userName || conversation.phoneNumber}
                       </h3>
                       {conversation.lastMessageTime && (
-                        <span className="text-xs text-purple-300">
-                          {formatMessageTimestamp(conversation.lastMessageTime)}
+                        <span className="text-xs text-zinc-500">
+                          {formatMessageTimestamp(
+                            conversation.lastMessageTime
+                          )}
                         </span>
                       )}
                     </div>
+
                     {conversation.lastMessage ? (
-                      <p className="text-sm text-purple-200 truncate mt-1">
+                      <p className="text-sm text-zinc-400 truncate mt-1">
                         {conversation.lastMessage}
                       </p>
                     ) : (
-                      <p className="text-sm text-purple-500 italic mt-1">No messages yet.</p>
+                      <p className="text-sm text-zinc-600 italic mt-1">
+                        No messages yet
+                      </p>
                     )}
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-center text-purple-400 mt-10">
+            <div className="text-center text-zinc-500 mt-10">
               {searchQuery ? 'No users found.' : 'No conversations yet.'}
             </div>
           )}
         </div>
       </div>
 
-      {/* Right panel (when no chat is selected) */}
-      <div className="hidden md:flex flex-1 items-center justify-center text-purple-300 text-xl">
+      {/* Empty State */}
+      <div className="hidden md:flex flex-1 items-center justify-center text-zinc-600 text-lg">
         Select a chat to start messaging
       </div>
     </div>
@@ -250,6 +242,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
-

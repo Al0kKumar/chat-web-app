@@ -309,20 +309,24 @@ const ChatPage = () => {
   }, [messages]);
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
+    <div className="h-screen flex flex-col bg-black text-white">
       {/* Header */}
-      <div className="flex items-center px-4 py-4 border-b border-white/10 bg-black/20 backdrop-blur">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-transparent">
-          <ArrowLeft className="text-gray-400 hover:text-gray-400" />
+      <div className="flex items-center px-4 py-3 border-b border-white/10 bg-zinc-950">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/dashboard')}
+        >
+          <ArrowLeft className="text-zinc-400" />
         </Button>
 
         <div
-          className="flex-1 ml-4 flex items-center space-x-3 cursor-pointer hover:bg-white/5 px-2 py-2 rounded-md transition"
+          className="flex-1 ml-3 flex items-center gap-3 cursor-pointer hover:bg-white/5 px-2 py-2 rounded-md transition"
           onClick={() =>
             navigate(`/user/${conversationId}`, {
               state: {
-                username: username,
-                phoneNumber: phoneNumber,
+                username,
+                phoneNumber,
                 id: Number(conversationId),
               },
             })
@@ -331,16 +335,15 @@ const ChatPage = () => {
           {recipientProfilePic ? (
             <img
               src={recipientProfilePic}
-              alt="Profile"
-              className="h-10 w-10 rounded-full object-cover border border-white/10"
+              className="h-9 w-9 rounded-full object-cover border border-white/10"
               onError={() => setRecipientProfilePic(null)}
             />
           ) : (
-            <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-white">
+            <div className="h-9 w-9 rounded-full bg-gradient-to-r from-green-400 to-cyan-400 text-black font-semibold flex items-center justify-center">
               {username
                 ? username
                     .split(' ')
-                    .map((n) => n[0])
+                    .map((n: string) => n[0])
                     .join('')
                     .slice(0, 2)
                     .toUpperCase()
@@ -348,8 +351,8 @@ const ChatPage = () => {
             </div>
           )}
 
-          <span className="text-lg font-semibold text-white truncate">
-            {username || phoneNumber || `Chat #${conversationId}`}
+          <span className="font-medium truncate">
+            {username || phoneNumber || `Chat`}
           </span>
         </div>
       </div>
@@ -358,12 +361,17 @@ const ChatPage = () => {
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.length > 0 ? (
           messages.map((msg, idx) => (
-            <div key={idx} className={`w-full flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}>
+            <div
+              key={idx}
+              className={`w-full flex ${
+                msg.isOwn ? 'justify-end' : 'justify-start'
+              }`}
+            >
               <div
-                className={`max-w-xs md:max-w-sm lg:max-w-md p-3 rounded-2xl text-sm ${
+                className={`max-w-xs md:max-w-sm lg:max-w-md px-4 py-2 rounded-2xl text-sm ${
                   msg.isOwn
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-white/10 text-white border border-white/10'
+                    ? 'bg-gradient-to-r from-green-400 to-cyan-400 text-black'
+                    : 'bg-white/5 border border-white/10 text-white'
                 }`}
               >
                 <p>{msg.content}</p>
@@ -374,21 +382,26 @@ const ChatPage = () => {
             </div>
           ))
         ) : (
-          <div className="text-purple-300 italic text-center mt-10">No messages yet.</div>
+          <div className="text-zinc-600 italic text-center mt-10">
+            No messages yet
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-white/10 bg-black/30 backdrop-blur-sm flex gap-2">
+      <div className="p-4 border-t border-white/10 bg-zinc-950 flex gap-2">
         <Input
-          placeholder="Type a message..."
-          className="bg-white/10 border-white/20 text-white focus:ring-1 focus:ring-purple-500"
+          placeholder="Type a message…"
           value={newMsg}
           onChange={(e) => setNewMsg(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          className="bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-green-400"
         />
-        <Button onClick={handleSend} variant="default">
+        <Button
+          onClick={handleSend}
+          className="bg-gradient-to-r from-green-400 to-cyan-400 text-black hover:from-green-500 hover:to-cyan-500"
+        >
           <Send className="h-4 w-4" />
         </Button>
       </div>

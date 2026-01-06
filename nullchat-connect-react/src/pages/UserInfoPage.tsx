@@ -385,38 +385,41 @@ const UserInfoPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white px-6 py-8">
+    <div className="min-h-screen bg-black text-white px-6 py-8">
+      {/* Header */}
       <div className="flex items-center mb-8">
         <button
           onClick={() => navigate(-1)}
           className="p-2 rounded-full hover:bg-white/10 transition"
         >
-          <ArrowLeft className="text-white h-6 w-6" />
+          <ArrowLeft className="h-6 w-6 text-zinc-400" />
         </button>
-        <h1 className="text-2xl font-bold ml-4">User Info</h1>
+        <h1 className="text-xl font-semibold ml-4">User Info</h1>
       </div>
 
-      <div className="max-w-md mx-auto bg-white/5 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-md text-center">
-        <div className="w-24 h-24 mx-auto mb-2 relative">
+      {/* Card */}
+      <div className="max-w-md mx-auto bg-white/5 backdrop-blur-xl p-8 rounded-2xl border border-white/10 shadow-md text-center">
+        {/* Avatar */}
+        <div className="w-24 h-24 mx-auto mb-3 relative">
           <Avatar key={currentProfilePic} className="w-full h-full">
             {currentProfilePic ? (
               <AvatarImage
                 src={currentProfilePic}
                 onError={() => setCurrentProfilePic(null)}
-                alt={`${username || 'User'}'s profile`}
                 className="object-cover"
               />
             ) : (
-              <AvatarFallback className="w-full h-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-3xl font-bold">
+              <AvatarFallback className="bg-gradient-to-r from-green-400 to-cyan-400 text-black text-3xl font-bold">
                 {getInitials()}
               </AvatarFallback>
             )}
           </Avatar>
         </div>
 
+        {/* Controls */}
         {isMyProfile && (
           <div className="flex justify-center gap-3 mt-3">
-            <label className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2 h-10 w-10 flex items-center justify-center shadow-md cursor-pointer">
+            <label className="bg-gradient-to-r from-green-400 to-cyan-400 text-black rounded-full p-2 h-10 w-10 flex items-center justify-center cursor-pointer hover:from-green-500 hover:to-cyan-500 transition">
               {loadingUpload ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : currentProfilePic ? (
@@ -431,13 +434,14 @@ const UserInfoPage = () => {
                 className="hidden"
               />
             </label>
+
             {currentProfilePic && (
               <Button
                 variant="ghost"
                 size="icon"
-                className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 h-10 w-10"
                 onClick={handleRemoveProfilePic}
                 disabled={loadingUpload}
+                className="bg-red-600/80 hover:bg-red-600 text-white rounded-full h-10 w-10"
               >
                 <Trash2 className="h-5 w-5" />
               </Button>
@@ -445,17 +449,22 @@ const UserInfoPage = () => {
           </div>
         )}
 
+        {/* Info */}
         <h2 className="mt-4 text-2xl font-semibold">
-          {username?.trim() ? username : 'Unknown User'}
+          {username?.trim() || 'Unknown User'}
         </h2>
 
         {phoneNumber ? (
-          <p className="mt-2 text-lg text-purple-200 flex items-center justify-center space-x-2">
-            <span className="bg-white/10 text-purple-300 px-2 py-0.5 rounded-full text-sm font-medium tracking-wide">+91</span>
-            <span className="text-white tracking-wide font-mono">{phoneNumber}</span>
+          <p className="mt-2 text-zinc-400 flex items-center justify-center gap-2">
+            <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs">
+              +91
+            </span>
+            <span className="font-mono tracking-wide text-white">
+              {phoneNumber}
+            </span>
           </p>
         ) : (
-          <p className="text-purple-300 mt-2">No Number</p>
+          <p className="text-zinc-500 mt-2">No phone number</p>
         )}
       </div>
     </div>
