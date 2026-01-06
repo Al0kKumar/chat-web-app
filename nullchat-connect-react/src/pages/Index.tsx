@@ -28,10 +28,18 @@ const Index = () => {
             <Link to="/login">
               <Button
                 variant="ghost"
-                className="text-zinc-200 hover:bg-white/10"
+                className="
+                  text-zinc-100
+                  hover:text-white
+                  hover:bg-white/10
+                  hover:backdrop-blur-md
+                  px-5 py-2 rounded-lg
+                  transition-all duration-200
+                "
               >
                 Sign In
               </Button>
+
             </Link>
             <Link to="/signup">
               <Button className="bg-gradient-to-r from-green-400 to-cyan-400 hover:from-green-500 hover:to-cyan-500 text-black font-semibold">
@@ -69,14 +77,25 @@ const Index = () => {
             </Link>
 
             <Link to="/login">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-green-400/40 text-green-300 hover:bg-green-400/10 px-10 py-5 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-105"
-              >
-                Sign In
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              className="
+                bg-white/10 
+                text-white 
+                border border-white/20
+                backdrop-blur-md
+                hover:bg-white/20
+                hover:border-white/40
+                px-10 py-5 text-lg font-semibold 
+                rounded-xl 
+                transition-all duration-300 
+                transform hover:scale-105
+              "
+            >
+              Sign In
+            </Button>
+          </Link>
+
           </div>
         </div>
       </div>
@@ -172,11 +191,11 @@ const Index = () => {
             >
               <Github className="h-5 w-5 text-zinc-400 hover:text-green-400 transition" />
             </a>
-            <a href="mailto:mishraalok189381@email.com">
+            <a href="mailto:alok.mishraa.dev@email.com">
               <Mail className="h-5 w-5 text-zinc-400 hover:text-green-400 transition" />
             </a>
             <a
-              href="https://www.linkedin.com/in/alok-kumar09/"
+              href="https://www.linkedin.com/in/alok-kumar-sde"
               target="_blank"
               rel="noreferrer"
             >
